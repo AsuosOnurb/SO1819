@@ -7,7 +7,7 @@
 #include <zconf.h>
 #include "sv.h"
 
-ssize_t sv_registaVenda(int quantidade, char *codigoArtigo, double precoArtigo) {
+ssize_t registaVenda(int quantidade, char *codigoArtigo, double precoArtigo) {
     // Abrimos o ficheiro de vendas.
     // Criamo-lo caso ainda não exista.
     int fd = open("VENDAS.txt", O_CREAT | O_WRONLY, S_IWUSR);
@@ -45,3 +45,5 @@ ssize_t sv_registaVenda(int quantidade, char *codigoArtigo, double precoArtigo) 
 
 
 }
+
+
