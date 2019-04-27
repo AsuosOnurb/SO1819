@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../include/sv.h"
+#include "servidor_vendas/sv.h"
 
 int main() {
     printf("Hello, World!\n");

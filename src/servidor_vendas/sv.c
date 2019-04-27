@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <zconf.h>
-#include "../include/sv.h"
+#include "sv.h"
 
 ssize_t sv_registaVenda(int quantidade, char *codigoArtigo, double precoArtigo) {
     // Abrimos o ficheiro de vendas.
