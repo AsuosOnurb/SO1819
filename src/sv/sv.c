@@ -7,13 +7,13 @@
 #include <zconf.h>
 #include "sv.h"
 
-ssize_t sv_registaVenda(int quantidade, char *codigoArtigo, double precoArtigo) {
+ssize_t registaVenda(int quantidade, char *codigoArtigo, double precoArtigo) {
     // Abrimos o ficheiro de vendas.
     // Criamo-lo caso ainda não exista.
     int fd = open("VENDAS.txt", O_CREAT | O_WRONLY, S_IWUSR);
 
 
-    //COnversão da quantidade para uma string
+    // Conversão da quantidade para uma string
     int tamStrQuantidade = snprintf(NULL, 0, "%d", quantidade);
     char *strQuantidade = malloc(tamStrQuantidade + 1); // +1 Pelo \0
     snprintf(strQuantidade, tamStrQuantidade + 1, "%d", quantidade);
@@ -43,5 +43,13 @@ ssize_t sv_registaVenda(int quantidade, char *codigoArtigo, double precoArtigo) 
 
     return bytesEscritos;
 
+}
+
+/*
+void updateStock(char* codigoArtigo, int novaQuantidade){
 
 }
+ */
+
+
+
