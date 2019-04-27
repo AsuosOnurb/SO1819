@@ -1,6 +1,4 @@
-//
-// Created by badns on 27-04-2019.
-//
+
 
 #ifndef SO1819_SV_H
 #define SO1819_SV_H
