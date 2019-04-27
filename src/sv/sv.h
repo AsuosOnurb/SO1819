@@ -6,9 +6,10 @@
 #endif //SO1819_SV_H
 
 /**
- * Regista
- * @param quantidade
- * @param codigoArtigo
- * @param precoArtigo
+ * Cria uma entrada no ficheiro VENDAS.txt relativa a uma venda.
+ * @param quantidade Quantidade de artigos vendida.
+ * @param codigoArtigo Código do artigo vendido.
+ * @param precoArtigo Preço individual do artigo.
+ * @return O tamanho, em bytes, da string escrita.
  */
-ssize_t sv_registaVenda(int quantidade, char *codigoArtigo, double precoArtigo);
+ssize_t registaVenda(int quantidade, char *codigoArtigo, double precoArtigo);
