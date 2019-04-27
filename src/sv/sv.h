@@ -10,5 +10,6 @@
  * @param quantidade Quantidade de artigos vendida.
  * @param codigoArtigo Código do artigo vendido.
  * @param precoArtigo Preço individual do artigo.
+ * @return O tamanho, em bytes, da string escrita.
  */
 ssize_t registaVenda(int quantidade, char *codigoArtigo, double precoArtigo);

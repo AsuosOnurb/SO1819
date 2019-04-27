@@ -46,4 +46,3 @@ ssize_t registaVenda(int quantidade, char *codigoArtigo, double precoArtigo) {
 
 }
 
-
