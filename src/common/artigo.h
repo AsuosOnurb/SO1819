@@ -22,4 +22,13 @@ typedef struct artigo {
 Artigo criaArtigo(char *const nomeArtigo, char *const codigoArtigo, int quantidade, int preco);
 
 
+/**
+ * Cria uma cópia de um artigo.
+ * @param artigo O artigo a copiar.
+ * @return A cópia do artigo.
+ */
+Artigo copiaArtigo(Artigo *artigo);
+
+
+
 #endif //SO1819_ARTIGO_H
