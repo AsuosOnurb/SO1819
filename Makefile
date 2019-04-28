@@ -96,7 +96,7 @@ EXECUTABLE_AG_OBJECTS := $(addprefix $(OBJ_DIR)/, $(EXECUTABLE_AG_OBJECTS))
 EXECUTABLE_AG_OBJECTS := $(addsuffix .o, $(EXECUTABLE_AG_OBJECTS))
 
 ### Build a list of all project source files
-ALL_FILES = src gdbinit Makefile Doxyfile readme.txt
+ALL_FILES = src gdbinit Makefile Doxyfile README.md
 
 
 ## Targets

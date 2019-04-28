@@ -53,7 +53,7 @@ char fdb_readc(fdb_t fdbuf);
 /**
  * @brief Reads a full line from the file descriptor associated with the specified buffer.
  * Blocks depending on the underlying file descriptor's blocking status.
- * 
+ *
  * @param fdbuf The buffer to read from
  * @param buf The buffer where to store the line that was read
  * @param size The size of the storage buffer
@@ -65,7 +65,7 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size);
 /**
  * @brief Writes a string to the file descriptor associated with the specified buffer.
  * Blocks depending on the underlying file descriptor's blocking status.
- * 
+ *
  * @param fdbuf The buffer to write to
  * @param buf The string to write to the file descriptor
  * 
@@ -103,4 +103,4 @@ int fdb_fopen(const char *path, int flags, fdb_t *fdbuf);
  */
 int fdb_fclose(fdb_t fdbuf);
 
-#endif
+#endif // FDB_H
