@@ -139,7 +139,7 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
 
     size_t totalCapacity = size;
 
-    --size; // Make size for the finishing '\0' character
+    --size; // Make space for the finishing '\0' character
 
     // As long as we want more characters, we keep reading
     while(size > 0 && *buf != '\n') {
@@ -167,25 +167,26 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
         // Essentially a min(size, fdbuf->occupation - fdbuf->start)
         if(size > fdbuf->occupation - fdbuf->start)
             bytesToRead = fdbuf->occupation - fdbuf->start;
+
+        // Assumes we don't stop reading until we exhaust the number of available bytes
+        size -= bytesToRead;
         
         // Read character by character until we find a newline, or exceed the buffer's size
-        while(bytesToRead > 0) {
+        while(bytesToRead > 0 && *buf != '\n') {
             *buf = fdbuffer_readc_unchecked(fdbuf);
-
-            if(*buf == '\n')
-                break;
+            buf++;
             
             bytesToRead--;
-            buf++;
         }
 
-        size -= bytesToRead;
+        // If bytesToRead == 0, then nothing happens
+        // But if a newline character was found before we exhausted the buffer,
+        // then we need to restore those bytes to the count of bytes read this iteration,
+        // so that we're able to determine the number of bytes read overall
+        size += bytesToRead;
     }
 
-    if(*(buf - 1) == '\n') {
-        *(buf - 1) = '\0'; // Removes the newline character, to make the string printf-able
-        size++; // Since we're replacing a character of the string, then we don't need to use the reserved byte for terminating
-    } else *buf = '\0'; // If there's no trailing newline character, just null-terminate the string anyway
+    *buf = '\0'; // Null-terminate the string
 
     // Return the number of bytes effectively read from the buffer
     return totalCapacity - size;
@@ -224,6 +225,10 @@ int fdb_printf(fdb_t fdbuf, const char *fmt, ...) {
 
     // Compute the number of bytes of the output, properly formatted string
     size_t requiredBytes = vsnprintf(NULL, 0, fmt, argList);
+
+    // Restart the va_list struct to the beginning
+    va_end(argList);
+    va_start(argList, fmt);
 
     // Allocate enough space for the output string
     char *out = (char *) malloc(requiredBytes + 1);
