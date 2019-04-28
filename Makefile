@@ -54,7 +54,7 @@ endif
 bin ?= $(firstword $(MAKECMDGOALS))
 
 ifeq ($(bin),)
-$(error Invalid binary name specified in flag bin)
+bin := all
 endif
 
 bin := $(addprefix $(OUT_DIR)/, $(bin))
@@ -91,7 +91,7 @@ ALL_FILES = src gdbinit Makefile Doxyfile readme.txt
 
 #### Executable targets
 
-##### Target: Build all the executables
+##### Default Target: Build all the executables
 all: $(EXECUTABLE_LIST)
 
 ##### Target: Build the ma executable
