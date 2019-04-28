@@ -1,6 +1,9 @@
 # You can change this
+
+# Name of the project
 PROJECT_NAME := SO1819
 
+# The names of every executable; both in a list and individually
 EXECUTABLE_LIST := ma sv cv ag
 
 EXECUTABLE_MA := ma
@@ -8,20 +11,31 @@ EXECUTABLE_SV := sv
 EXECUTABLE_CV := cv
 EXECUTABLE_AG := ag
 
+# Which objects to place in each executable.
+# Objects are assumed to be located under the src/ directory,
+# and are assumed to have no extensions (these are added automatically)
 EXECUTABLE_MA_OBJECTS := ma/main
 EXECUTABLE_SV_OBJECTS := sv/main
 EXECUTABLE_CV_OBJECTS := cv/main
 EXECUTABLE_AG_OBJECTS := ag/main
 
+# Compiler to use
 GCC := gcc
+# Compiler flags to use in all cases
 GCC_FLAGS := -std=c11 -Wall -Wextra -pedantic
+# Compiler flags to use for production builds
 GCC_PRODUCTION_FLAGS := -O2
+# Compiler flags to use for debug builds
 GCC_DEBUG_FLAGS := -O0 -ggdb
 
+# Debugger to use
 GDB := gdb
+# Flags to use when running the debugger
 GDB_FLAGS := -return-child-result -x gdbinit
 
+# Which strace executable should we run
 STRACE := strace
+# Flags to use when running strace
 STRACE_FLAGS := 
 
 # Don't change from here
