@@ -8,9 +8,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "fdbuffer.h"
+#include "fdb.h"
 
-int fdbuffer_create(int fd, fdbuffer_t *fdbufLoc) {
+int fdb_create(int fd, fdb_t *fdbufLoc) {
     // Check parameters
     if(fd < 0)
         return -1;
@@ -25,7 +25,7 @@ int fdbuffer_create(int fd, fdbuffer_t *fdbufLoc) {
     size_t blockSize = (size_t) sb.st_blksize;
 
     // Allocate memory for the buffer struct
-    fdbuffer_t fdbuf = (fdbuffer_t) malloc(sizeof(struct fdbuffer));
+    fdb_t fdbuf = (fdb_t) malloc(sizeof(struct fdb));
 
     // Initialize struct values
     fdbuf->fd = fd;
@@ -45,7 +45,7 @@ int fdbuffer_create(int fd, fdbuffer_t *fdbufLoc) {
     return 0;
 }
 
-int fdbuffer_destroy(fdbuffer_t fdbuf) {
+int fdb_destroy(fdb_t fdbuf) {
     // Check parameters
     if(fdbuf == NULL)
         return -1;
@@ -65,7 +65,7 @@ int fdbuffer_destroy(fdbuffer_t fdbuf) {
  * 
  * @return <0 on error, 0 on EOF, or else the number of bytes read (max BYTES_SYSCALL_READ)
  */
-ssize_t fdbuffer_fillbuf(fdbuffer_t fdbuf) {
+ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
     // Check parameters
     //if(fdbuf == NULL) // Unnecessary: internal function that's only ever called after these checks were already done by the "main" api function
     //    return -1;
@@ -108,7 +108,7 @@ ssize_t fdbuffer_fillbuf(fdbuffer_t fdbuf) {
  */
 #define fdbuffer_readc_unchecked(f) f->buffer[f->start++]
 
-char fdbuffer_readc(fdbuffer_t fdbuf) {
+char fdb_readc(fdb_t fdbuf) {
     // Check parameters
     if(fdbuf == NULL)
         return -1;
@@ -129,7 +129,7 @@ char fdbuffer_readc(fdbuffer_t fdbuf) {
     return fdbuffer_readc_unchecked(fdbuf);
 }
 
-ssize_t fdbuffer_readln(fdbuffer_t fdbuf, char *buf, size_t size) {
+ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
     // Check parameters
     if(fdbuf == NULL)
         return -1;
@@ -191,7 +191,7 @@ ssize_t fdbuffer_readln(fdbuffer_t fdbuf, char *buf, size_t size) {
     return totalCapacity - size;
 }
 
-int fdbuffer_writes(fdbuffer_t fdbuf, const char *buf) {
+int fdb_writes(fdb_t fdbuf, const char *buf) {
     // Check parameters
     if(fdbuf == NULL)
         return -1;
@@ -213,7 +213,7 @@ int fdbuffer_writes(fdbuffer_t fdbuf, const char *buf) {
     return 0;
 }
 
-int fdbuffer_printf(fdbuffer_t fdbuf, const char *fmt, ...) {
+int fdb_printf(fdb_t fdbuf, const char *fmt, ...) {
     // Check parameters
     if(fdbuf == NULL)
         return -1;
@@ -240,7 +240,7 @@ int fdbuffer_printf(fdbuffer_t fdbuf, const char *fmt, ...) {
     va_end(argList);
 
     // Write the output string to the buffer
-    int result = fdbuffer_writes(fdbuf, out);
+    int result = fdb_writes(fdbuf, out);
 
     // Free the memory used by the properly formatted string
     free(out);
@@ -249,7 +249,7 @@ int fdbuffer_printf(fdbuffer_t fdbuf, const char *fmt, ...) {
     return result;
 }
 
-int fdbuffer_fopen(const char *path, int flags, fdbuffer_t *fdbuf) {
+int fdb_fopen(const char *path, int flags, fdb_t *fdbuf) {
     // Check parameters
     if(path == NULL)
         return -1;
@@ -265,10 +265,10 @@ int fdbuffer_fopen(const char *path, int flags, fdbuffer_t *fdbuf) {
         return -4;
     
     // Create a new fdbuf and return it
-    return fdbuffer_create(fd, fdbuf);
+    return fdb_create(fd, fdbuf);
 }
 
-int fdbuffer_fclose(fdbuffer_t fdbuf) {
+int fdb_fclose(fdb_t fdbuf) {
     // Check parameters
     if(fdbuf == NULL)
         return -1;

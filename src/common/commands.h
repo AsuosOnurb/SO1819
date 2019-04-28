@@ -1,3 +1,6 @@
+#ifndef COMMANDS_H
+#define COMMANDS_H
+
 #include <stdbool.h>
 
 /**
@@ -32,3 +35,5 @@ int execute_command_with(char *command, int stdinfd, int fdstdout, int *returnCo
  * @return <0 if error, 0 on success
  */
 int execute_command_with_pipes(char *command_with_pipes);
+
+#endif

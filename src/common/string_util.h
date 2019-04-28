@@ -1,3 +1,6 @@
+#ifndef STRING_UTIL_H
+#define STRING_UTIL_H
+
 /**
  * Splits a single string by the delimiter sep, returning an array of arrays for each token in the input string.
  * 
@@ -15,3 +18,5 @@ size_t str_split(char *str, char sep, char ***pArgv);
  * @param argv The array of strings to free
  */
 void free_all(char **argv);
+
+#endif
