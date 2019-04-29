@@ -15,7 +15,7 @@ EXECUTABLE_AG := ag
 # Objects are assumed to be located under the src/ directory,
 # and are assumed to have no extensions (these are added automatically)
 EXECUTABLE_MA_OBJECTS := common/commands common/fdb common/string_util ma/main
-EXECUTABLE_SV_OBJECTS := common/commands common/fdb common/string_util sv/main
+EXECUTABLE_SV_OBJECTS := common/commands common/fdb common/string_util sv/sv sv/main
 EXECUTABLE_CV_OBJECTS := common/commands common/fdb common/string_util cv/main
 EXECUTABLE_AG_OBJECTS := common/commands common/fdb common/string_util ag/main
 

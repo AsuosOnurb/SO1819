@@ -88,11 +88,12 @@ int fdb_printf(fdb_t fdbuf, const char *fmt, ...);
  * 
  * @param path The path of the file to open
  * @param flags Bitwised-flags of how to open the file
+ * @param mode Permission mode for the file
  * @param fdbuf Where to store the fdbuffer
  * 
  * @return <0 on error, or 0 on success
  */
-int fdb_fopen(const char *path, int flags, fdb_t *fdbuf);
+int fdb_fopen(const char *path, unsigned int flags, mode_t mode, fdb_t *fdbuf);
 
 /**
  * @brief Closes a file descriptor and destroys the fdbuffer associated with it.

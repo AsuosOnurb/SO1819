@@ -254,7 +254,7 @@ int fdb_printf(fdb_t fdbuf, const char *fmt, ...) {
     return result;
 }
 
-int fdb_fopen(const char *path, int flags, fdb_t *fdbuf) {
+int fdb_fopen(const char *path, unsigned int flags, mode_t mode, fdb_t *fdbuf) {
     // Check parameters
     if(path == NULL)
         return -1;
@@ -263,7 +263,7 @@ int fdb_fopen(const char *path, int flags, fdb_t *fdbuf) {
         return -3;
     
     // Open the file descriptor
-    int fd = open(path, flags);
+    int fd = open(path, flags, mode);
 
     // Check if open was successful
     if(fd == -1)
