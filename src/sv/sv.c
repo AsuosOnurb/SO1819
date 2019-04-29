@@ -10,7 +10,6 @@
 #include "sv.h"
 #include "../common/fdb.h"
 
-size_t registaVenda(int quantidade, char *codigoArtigo, double precoArtigo) {
 size_t regista_venda(int quantidade, char *codigoArtigo, double precoArtigo) {
     // Abrimos o ficheiro de vendas.
     // Criamo-lo caso ainda não exista.
