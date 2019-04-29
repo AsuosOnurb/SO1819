@@ -15,6 +15,8 @@ Artigo criaArtigo(char *const nomeArtigo, char *const codigoArtigo, int quantida
             .quantidade = quantidade,
             .preco = preco
     };
+}
 
-
+Artigo copiaArtigo(Artigo *artigo) {
+    return criaArtigo(artigo->nome, artigo->codigo, artigo->quantidade, artigo->preco);
 }
