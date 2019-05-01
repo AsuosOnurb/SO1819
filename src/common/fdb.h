@@ -51,8 +51,21 @@ int fdb_destroy(fdb_t fdbuf);
 char fdb_readc(fdb_t fdbuf);
 
 /**
+ * @brief Reads the specified number of bytes from the file descriptor.
+ * Blocks depending on the underlying file descriptor's blocking status.
+ * May read less bytes than @param size indicates; this is intentional, as we may have reached EOF.
+ *
+ * @param fdbuf
+ * @param buf
+ * @param size
+ * @return
+ */
+ssize_t fdb_read(fdb_t fdbuf, void *buf, size_t size);
+
+/**
  * @brief Reads a full line from the file descriptor associated with the specified buffer.
  * Blocks depending on the underlying file descriptor's blocking status.
+ * May read less bytes than @param size indicates; this is intentional, as we may have reached EOF, or the line may be smaller than @param size.
  *
  * @param fdbuf The buffer to read from
  * @param buf The buffer where to store the line that was read
@@ -63,15 +76,16 @@ char fdb_readc(fdb_t fdbuf);
 ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size);
 
 /**
- * @brief Writes a string to the file descriptor associated with the specified buffer.
+ * @brief Writes to the file descriptor associated with the specified buffer.
  * Blocks depending on the underlying file descriptor's blocking status.
  *
  * @param fdbuf The buffer to write to
- * @param buf The string to write to the file descriptor
+ * @param buf The data to write to the file descriptor
+ * @param size The number of bytes to write to the file descriptor
  * 
  * @return <0 on error, 0 on success
  */
-int fdb_writes(fdb_t fdbuf, const char *buf);
+int fdb_write(fdb_t fdbuf, const void *buf, size_t size);
 
 /**
  * @brief Writes a formatted string to the file descriptor associated with the specified buffer.
@@ -93,7 +107,7 @@ int fdb_printf(fdb_t fdbuf, const char *fmt, ...);
  * 
  * @return <0 on error, or 0 on success
  */
-int fdb_fopen(const char *path, unsigned int flags, mode_t mode, fdb_t *fdbuf);
+int fdb_fopen(fdb_t *fdbuf, const char *path, unsigned int flags, mode_t mode);
 
 /**
  * @brief Closes a file descriptor and destroys the fdbuffer associated with it.

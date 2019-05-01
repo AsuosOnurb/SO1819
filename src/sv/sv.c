@@ -15,7 +15,7 @@ size_t regista_venda(int quantidade, char *codigoArtigo, double precoArtigo) {
     // Criamo-lo caso ainda não exista.
     // int fd = open("VENDAS.txt", O_CREAT | O_WRONLY, S_IWUSR);
     fdb_t fdbuf;
-    fdb_fopen("VENDAS.txt", O_CREAT | O_WRONLY, S_IWUSR, &fdbuf);
+    fdb_fopen(&fdbuf, "VENDAS.txt", O_CREAT | O_WRONLY, S_IWUSR);
 
 
     // Conversão da quantidade para uma string
