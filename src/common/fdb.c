@@ -106,7 +106,7 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
 /**
  * @brief Reads a single character from fdbuf->buffer. Does not perform checks of any kind for performance reasons.
  */
-#define fdbuffer_readc_unchecked(f) f->buffer[f->start++]
+#define fdbuffer_readc_unchecked(f) (f)->buffer[(f)->start++]
 
 char fdb_readc(fdb_t fdbuf) {
     // Check parameters
@@ -218,11 +218,18 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
         size -= bytesToRead;
         
         // Read character by character until we find a newline, or exceed the buffer's size
-        while(bytesToRead > 0 && *buf != '\n') {
+        while(bytesToRead > 0) {
             *buf = fdbuffer_readc_unchecked(fdbuf);
-            buf++;
-            
             bytesToRead--;
+
+            // This condition MUST be kept inside the loop, otherwise,
+            // buf++ would make it such that, next iteration, *buf != '\n',
+            // and therefore, we would hit an infinite loop of read(2)s until
+            // we exhaust the supplied buffer.
+            if(*buf == '\n')
+                break;
+
+            buf++;
         }
 
         // If bytesToRead == 0, then nothing happens
@@ -232,7 +239,7 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
         size += bytesToRead;
     }
 
-    *buf = '\0'; // Null-terminate the string
+    *(++buf) = '\0'; // Null-terminate the string
 
     // Return the number of bytes effectively read from the buffer
     return totalCapacity - size;
