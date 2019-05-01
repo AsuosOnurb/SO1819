@@ -28,7 +28,8 @@ int main(int argc, const char *argv[]) {
 
     char line[DEBIAN_STANDARD_LINE_SIZE] = {0}; // Default size on Debian bash is 128KB
     while(true) {
-        fdb_writes(fdbufStdout, "> ");
+        //fdb_write(fdbufStdout, "> ")
+        fdb_write(fdbufStdout, ">", strlen(">"));
 
         if(fdb_readln(fdbufStdin, line, DEBIAN_STANDARD_LINE_SIZE) >= 0) {
             if(strcmp(line, "exit") == 0)

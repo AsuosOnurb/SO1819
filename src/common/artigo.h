@@ -10,7 +10,7 @@ typedef struct artigo {
 } Artigo;
 
 /**
- * Criação de um artigo novo.
+ * @brief Criação de um artigo novo.
  * @param nomeArtigo Nome do artigo a criar.
  * @param codigoArtigo Código do artigo a criar.
  * @param quantidade Quantidade de artigos a criar.
@@ -21,7 +21,7 @@ Artigo criaArtigo(char *const nomeArtigo, char *const codigoArtigo, int quantida
 
 
 /**
- * Cria uma cópia de um artigo.
+ * @brief Cria uma cópia de um artigo.
  * @param artigo O artigo a copiar.
  * @return A cópia do artigo.
  */
