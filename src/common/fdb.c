@@ -304,7 +304,7 @@ int fdb_printf(fdb_t fdbuf, const char *fmt, ...) {
     return result;
 }
 
-int fdb_fopen(fdb_t *fdbuf, const char *path, unsigned int flags, mode_t mode) {
+int fdb_fopen(fdb_t *fdbuf, const char *path, int flags, mode_t mode) {
     // Check parameters
     if(path == NULL)
         return -1;

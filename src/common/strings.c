@@ -1,7 +1,34 @@
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "string_util.h"
+#include "fdb.c"
+
+#include "strings.h"
+
+/**
+ * @brief Abre o ficheiro STRINGS para leitura.
+ *
+ * @param write 1 se quisermos abrir o ficheiro para escrita, assim como leitura
+ * @return 0 se tudo correu bem, <0 em caso de erro
+ */
+int strings_open(int write) {
+    int flags = O_CREAT;
+
+    if(write) flags |= O_RDWR;
+    else flags |= O_RDONLY;
+
+    fdb_t fdbuf;
+    fdb_fopen(&fdbuf, NOME_FICHEIRO_STRINGS, flags, 0666);
+    
+}
+
+int strings_fill(string_t *string) {
+    // Verificar parâmetros
+    if(string == NULL)
+        return -1;
+
+    // Efetivamente ler o valor da string e preencher o mesmo
+}
 
 size_t str_split(char *str, char sep, char ***pArgv) {
     // Parse arguments and create argc, argv
