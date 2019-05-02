@@ -5,117 +5,145 @@
 #include <stdbool.h>
 
 /**
- * @brief Defines a file descriptor with a read cache, similar to FILE*.
+ * @brief Define um "file descriptor buffer" (leia-se fdbuffer) com um descritor de ficheiro associado, na mesma ideia do que a estrutura FILE do C.
+ * Esta estrutura tem capacidade de buffering em memória, para evitar fazer reads desnecessários, e deste modo aumentar a performance.
+ * Esta estrutura tem também a capacidade de ler e escrever dados de vários tipos de e para o descritor de ficheiros associado.
  */
 typedef struct fdb {
-    /** @brief The file descriptor this buffer reads from. */
+    /** @brief O índice do descritor de ficheiros associado com este fdbuffer. */
     int fd;
-    /** @brief Buffer size. */
+    /** @brief Tamanho do buffer de leitura. */
     size_t size;
-    /** @brief Buffer start position. */
+    /** @brief Posição de início do buffer de leitura. */
     size_t start;
-    /** @brief Buffer occupation. */
+    /** @brief Ocupação do buffer. */
     size_t occupation;
-    /** @brief Bytes already read from the file descriptor. */
+    /** @brief Bytes já lidos do descritor de ficheiros. */
     char *buffer;
-    /** @brief True if EOF reached. */
+    /** @brief Verdadeiro se atingimos EOF. */
     bool eof;
 } *fdb_t;
 
 /**
- * @brief Creates a FD Buffer for reading and writing to file descriptors.
+ * @brief Cria um fdbuffer com o descritor indicado.
  * 
- * @param fd The file descriptor to use for buffer operations
- * @param fdbuf Where to store the buffer
+ * @param fd O descritor de ficheiros a associar ao fdbuffer
+ * @param fdbuf Onde guardar o fdbuffer criado
  * 
- * @return 0 on success, <0 on error
+ * @return 0 se correu tudo bem, <0 em caso de erro
  */
 int fdb_create(int fd, fdb_t *fdbuf);
 
 /**
- * @brief Destroys a FD Buffer.
+ * @brief Destrói um fdbuffer.
  * 
- * @param fdbuf The buffer to destroy
+ * @param fdbuf O fdbuffer a destruir
  * 
- * @return 0 on success, <0 on error
+ * @return 0 se correu tudo bem, <0 em caso de erro
  */
 int fdb_destroy(fdb_t fdbuf);
 
 /**
- * @brief Reads a character from the file descriptor associated with the specified buffer.
+ * @brief Le um caracter a partir do descritor de ficheiros associado ao fdbuffer especificado.
  * 
- * @param fdbuf The buffer to read from
+ * @param fdbuf O fdbuffer a partir do qual ler
  * 
- * @return <0 on error, or the character read from the file descriptor
+ * @return Se tudo correu bem, o caracter lido a partir do descritor; em caso de erro, retorna um número negativo, como código de erro
  */
 char fdb_readc(fdb_t fdbuf);
 
 /**
- * @brief Reads the specified number of bytes from the file descriptor.
- * Blocks depending on the underlying file descriptor's blocking status.
- * May read less bytes than @param size indicates; this is intentional, as we may have reached EOF.
+ * @brief Lê o número de bytes especificado a partir do descritor de ficheiros associado ao fdbuffer especificado.
+ * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.
+ * Pode ler menos bytes do que {@param size} indica; é intencional, pois podemos ter chegado a EOF.
  *
- * @param fdbuf
- * @param buf
- * @param size
- * @return
+ * @param fdbuf O fdbuffer a partir do qual ler
+ * @param buf O buffer onde guardar os dados lidos
+ * @param size O tamanho máximo do buffer especificado em {@param buf}
+ *
+ * @return O número de bytes efetivamente lidos, ou <0 em caso de erro
  */
 ssize_t fdb_read(fdb_t fdbuf, void *buf, size_t size);
 
 /**
- * @brief Reads a full line from the file descriptor associated with the specified buffer.
- * Blocks depending on the underlying file descriptor's blocking status.
- * May read less bytes than @param size indicates; this is intentional, as we may have reached EOF, or the line may be smaller than @param size.
+ * @brief Lẽ uma string a partir do descritor associado.
+ * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.
+ * Pode ler menos bytes do que {@param size} indica; é intencional, pois podemos ter chegado a EOF, ou a string pode ser menor do que o parâmetro {@param size}.
  *
- * @param fdbuf The buffer to read from
- * @param buf The buffer where to store the line that was read
- * @param size The size of the storage buffer
- * 
- * @return <0 on error, or the number of bytes read on success
+ * @param fdbuf O fdbuffer a partir do qual ler
+ * @param buf O buffer onde guardar os dados lidos
+ * @param size O tamanho máximo do buffer especificado em {@param buf}
+ *
+ * @return O número de bytes efetivamente lidos, ou <0 em caso de erro
+ */
+ssize_t fdb_reads(fdb_t fdbuf, char *buf, size_t size);
+
+/**
+ * @brief Lẽ uma linha (que termina com \n) a partir do descritor associado.
+ * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.
+ * Pode ler menos bytes do que {@param size} indica; é intencional, pois podemos ter chegado a EOF, ou a string pode ser menor do que o parâmetro {@param size}.
+ *
+ * @param fdbuf O fdbuffer a partir do qual ler
+ * @param buf O buffer onde guardar a linha lida. Inclúi, na posição (return - 2), o caracter '\n', para que seja possível, desse modo, distinguir se a linha lida foi completa, ou se o buffer {@param buf} não tinha tamanho suficiente para ler uma linha completa.
+ * @param size O tamanho máximo do buffer especificado em {@param buf}
+ *
+ * @return O número de bytes efetivamente lidos, ou <0 em caso de erro
  */
 ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size);
 
 /**
- * @brief Writes to the file descriptor associated with the specified buffer.
- * Blocks depending on the underlying file descriptor's blocking status.
+ * @brief Escreve para o descritor de ficheiros os dados especificados.
+ * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.
  *
- * @param fdbuf The buffer to write to
- * @param buf The data to write to the file descriptor
- * @param size The number of bytes to write to the file descriptor
- * 
- * @return <0 on error, 0 on success
+ * @param fdbuf O fdbuffer para o qual escrever
+ * @param buf O buffer que contém os dados a escrever
+ * @param size O número de bytes de {@param buf} a escrever
+ *
+ * @return 0 em caso de sucesso, ou <0 em caso de erro
  */
 int fdb_write(fdb_t fdbuf, const void *buf, size_t size);
 
 /**
- * @brief Writes a formatted string to the file descriptor associated with the specified buffer.
+ * @brief Escreve para o descritor de ficheiros uma string formatada no mesmo estilo da função printf().
+ * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.
  *
- * @param fdbuf The buffer to write to
- * @param fmt The string to format
- * @param ... The format arguments
- * @return
+ * @param fdbuf O fdbuffer para o qual escrever
+ * @param fmt O formato da string a escrever, no mesmo formato da família de funções printf()
+ * @param ... As variáveis a substituir no formato especificado
+ *
+ * @return 0 em caso de sucesso, ou <0 em caso de erro
  */
 int fdb_printf(fdb_t fdbuf, const char *fmt, ...);
 
 /**
- * @brief Opens a file and returns a fdbuffer associated with it.
+ * @brief Abre o ficheiro especificado, e cria um fdbuffer associado ao descritor de ficheiros retornado.
  * 
- * @param path The path of the file to open
- * @param flags Bitwised-flags of how to open the file
- * @param mode Permission mode for the file
- * @param fdbuf Where to store the fdbuffer
- * 
+ * @param fdbuf Onde guardar o fdbuffer criado
+ * @param path O caminho para o ficheiro a abrir
+ * @param flags Bitwised-flags sobre como abrir o ficheiro (que irão ser passadas à system call read)
+ * @param mode Modo de permissões para o ficheiro a abrir
+ *
  * @return <0 on error, or 0 on success
  */
 int fdb_fopen(fdb_t *fdbuf, const char *path, int flags, mode_t mode);
 
 /**
- * @brief Closes a file descriptor and destroys the fdbuffer associated with it.
+ * @brief Fecha o fdbuffer e o file descriptor associado com o fdbuffer especificado.
+ *
+ * @param fdbuf O fdbuffer para fechar e destruir
  * 
- * @param fdbuf The buffer to close and destroy
- * 
- * @return <0 on error, 0 on success
+ * @return 0 em caso de sucesso, <0 em caso de erro
  */
 int fdb_fclose(fdb_t fdbuf);
+
+/**
+ * @brief Faz seek do descritor de ficheiros até à posição especificada.
+ *
+ * @param fdbuf O fdbuffer para fazer seek
+ * @param offset O offset para o qual fazer seek
+ *
+ * @return 0 em caso de sucesso, <0 em caso de erro
+ */
+int fdb_lseek(fdb_t fdbuf, int offset);
 
 #endif // FDB_H
