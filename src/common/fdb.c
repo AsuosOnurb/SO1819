@@ -86,8 +86,10 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
     ssize_t bytesRead = read(fdbuf->fd, fdbuf->buffer, fdbuf->size);
 
     // Check if the system call succeeded
-    if(bytesRead < 0)
+    if(bytesRead < 0) {
+        perror("read() failed: ");
         return -4; // Syscall failed
+    }
 
     // Check if EOF reached, and set eof flag on struct if so
     if(bytesRead == 0) {
@@ -167,6 +169,7 @@ ssize_t fdb_read(fdb_t fdbuf, void *buf, size_t size) {
         size -= bytesAvailable;
 
         memcpy(buf, fdbuf->buffer + fdbuf->start, bytesAvailable);
+        fdbuf->start += bytesAvailable;
 
         buf += bytesAvailable;
     }
@@ -244,6 +247,7 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
     // Return the number of bytes effectively read from the buffer
     return totalCapacity - size;
 }
+#include <sys/stat.h>
 
 int fdb_write(fdb_t fdbuf, const void *buf, size_t size) {
     // Check parameters
@@ -257,8 +261,10 @@ int fdb_write(fdb_t fdbuf, const void *buf, size_t size) {
     ssize_t writtenBytes = write(fdbuf->fd, buf, size);
 
     // Check if syscall was successful
-    if(writtenBytes < 0 || ((size_t) writtenBytes) != size)
+    if(writtenBytes < 0 || ((size_t) writtenBytes) != size) {
+        perror("write() failed: ");
         return -4;
+    }
 
     // Success!
     return 0;
@@ -316,8 +322,10 @@ int fdb_fopen(fdb_t *fdbuf, const char *path, int flags, mode_t mode) {
     int fd = open(path, flags, mode);
 
     // Check if open was successful
-    if(fd == -1)
+    if(fd == -1) {
+        perror("open() failed: ");
         return -4;
+    }
     
     // Create a new fdbuf and return it
     return fdb_create(fd, fdbuf);
@@ -338,6 +346,7 @@ int fdb_fclose(fdb_t fdbuf) {
     return 0;
 }
 
+/** {@inheritDoc} */
 int fdb_lseek(fdb_t fdbuf, off_t offset, int seekFlags) {
     // Verificar parâmetros
     if(fdbuf == NULL)
@@ -347,8 +356,10 @@ int fdb_lseek(fdb_t fdbuf, off_t offset, int seekFlags) {
     offset = lseek(fdbuf->fd, offset, seekFlags);
 
     // Verificar se a system call foi bem sucedida
-    if(offset == -1)
+    if(offset == -1) {
+        perror("lseek() failed: ");
         return -2;
+    }
 
     // Sucesso!
     return offset;

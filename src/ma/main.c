@@ -4,41 +4,19 @@
 
 #include "../common/fdb.h"
 #include "../common/commands.h"
-
-#define DEBIAN_STANDARD_LINE_SIZE 128 * 1024
+#include "../common/strings.h"
+#include "../common/util.h"
 
 int main(int argc, const char *argv[]) {
-    fdb_t fdbufStderr, fdbufStdout, fdbufStdin;
+    // Inicializar os ficheiros necessários
+    file_open(&g_pFdbStrings, "STRINGS", 1);
 
-    int err = 0;
-    if((err = fdb_create(STDERR_FILENO, &fdbufStderr)) < 0) {
-        fprintf(stderr, "Error creating fdbufStderr! Error code %d\n", err);
-        return -1;
-    }
+    string_t s1;
+    int saveSuccess = string_save("O Linhares é gay", &s1);
+    int loadSuccess = string_load(0, &s1);
 
-    if((err = fdb_create(STDOUT_FILENO, &fdbufStdout)) < 0) {
-        fprintf(stderr, "ERROR CREATING fdbufStdout! ERROR CODE %d\n", err);
-        return -2;
-    }
+    printf("Sucesso save: %d, sucesso load: %d\n", saveSuccess, loadSuccess);
 
-    if((err = fdb_create(STDIN_FILENO, &fdbufStdin)) < 0) {
-        fprintf(stderr, "Error creating fdbufStdin! Error code %d\n", err);
-        return -3;
-    }
-
-    char line[DEBIAN_STANDARD_LINE_SIZE] = {0}; // Default size on Debian bash is 128KB
-    while(true) {
-        fdb_printf(fdbufStdout, "> ");
-
-        if(fdb_readln(fdbufStdin, line, DEBIAN_STANDARD_LINE_SIZE) >= 0) {
-            if(strcmp(line, "exit") == 0)
-                break; // Check for exit command
-
-            if(execute_command_with_pipes(line) != 0)
-                fdb_printf(fdbufStdout, "Error in command: \"%s\"!\n", line);
-        }
-    }
-
-    fdb_destroy(fdbufStdin);
+    file_close(g_pFdbStrings);
     return 0;
 }

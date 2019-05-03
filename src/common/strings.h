@@ -1,15 +1,20 @@
 #ifndef STRING_UTIL_H
 #define STRING_UTIL_H
 
+#include "fdb.h"
+
 /** @brief Define o nome do ficheiro de STRINGS a utilizar. */
 #define NOME_FICHEIRO_STRINGS "STRINGS"
+
+/** @brief Guarda uma referência ao fdbuffer que lê e escreve para o ficheiro das STRINGS. */
+fdb_t g_pFdbStrings;
 
 /**
  * @brief Referência a uma string no ficheiro de STRINGS.
  */
 typedef struct string_ref {
     /** @brief Offset da string no ficheiro de STRINGS. */
-    size_t offset;
+    ssize_t offset;
     /** @brief Tamanho da string. */
     size_t length;
     /** @brief Valor efetivo da string, ou NULL se ainda não tiver sido preenchida. */

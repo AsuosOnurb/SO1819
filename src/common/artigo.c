@@ -4,7 +4,7 @@
 #include <zconf.h>
 #include "artigo.h"
 
-Artigo criaArtigo(char *const nomeArtigo, char *const codigoArtigo, int quantidade, int preco) {
+/*Artigo criaArtigo(char *const nomeArtigo, char *const codigoArtigo, int quantidade, int preco) {
 
     char *nomeA = strdup(nomeArtigo);
     char *codigoA = strdup(codigoArtigo);
@@ -19,4 +19,4 @@ Artigo criaArtigo(char *const nomeArtigo, char *const codigoArtigo, int quantida
 
 Artigo copiaArtigo(Artigo *artigo) {
     return criaArtigo(artigo->nome, artigo->codigo, artigo->quantidade, artigo->preco);
-}
+}*/

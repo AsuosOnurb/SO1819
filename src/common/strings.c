@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-#include "fdb.c"
+#include "fdb.h"
 
-#include "strings.h"
 #include "util.h"
+#include "strings.h"
 
 fdb_t g_pFdbStrings = NULL;
 
@@ -19,12 +21,12 @@ int string_load(size_t offset, string_t *strRef) {
             return -2;
 
     // Carregar efetivamente a string
-    if(fdb_lseek(g_pFdbStrings, offset) != 0)
+    if(fdb_lseek(g_pFdbStrings, offset, SEEK_SET) != offset)
         return -3;
 
     // Ler o tamanho da string a partir do ficheiro
     size_t length = 0;
-    if(fdb_read(g_pFdbStrings, &length, sizeof(size_t)) != 0)
+    if(fdb_read(g_pFdbStrings, &length, sizeof(size_t)) <= 0)
         return -4;
 
     // Verificar se o tamanho é válido
@@ -32,8 +34,8 @@ int string_load(size_t offset, string_t *strRef) {
         return -5;
 
     // Alocar espaço para a string
-    char *string = (char *) malloc(sizeof(char) * length);
-    if(fdb_read(g_pFdbStrings, string, length) != 0)
+    char *string = (char *) malloc(sizeof(char) * length + 1);
+    if(fdb_read(g_pFdbStrings, string, length) != length)
         return -6;
     string[length] = '\0'; // Terminar a string com NULL, pois este byte não é guardado no disco
 
@@ -57,7 +59,7 @@ int string_save(const char *string, string_t *strRef) {
 
     // Verificar se o ficheiro está aberto
     if(g_pFdbStrings == NULL)
-        if(file_open(&g_pFdbStrings, NOME_FICHEIRO_STRINGS, 0) != 0)
+        if(file_open(&g_pFdbStrings, NOME_FICHEIRO_STRINGS, 1) != 0)
             return -3;
 
     // Guardar efetivamente a string
