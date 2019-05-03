@@ -337,3 +337,19 @@ int fdb_fclose(fdb_t fdbuf) {
     
     return 0;
 }
+
+int fdb_lseek(fdb_t fdbuf, off_t offset, int seekFlags) {
+    // Verificar parâmetros
+    if(fdbuf == NULL)
+        return -1;
+
+    // Fazer a system call
+    offset = lseek(fdbuf->fd, offset, seekFlags);
+
+    // Verificar se a system call foi bem sucedida
+    if(offset == -1)
+        return -2;
+
+    // Sucesso!
+    return offset;
+}

@@ -141,9 +141,10 @@ int fdb_fclose(fdb_t fdbuf);
  *
  * @param fdbuf O fdbuffer para fazer seek
  * @param offset O offset para o qual fazer seek
+ * @param seekFlags Flags para passar à chamada lseek
  *
- * @return 0 em caso de sucesso, <0 em caso de erro
+ * @return O novo offset para leitura/escrita em caso de sucesso, <0 em caso de erro
  */
-int fdb_lseek(fdb_t fdbuf, int offset);
+int fdb_lseek(fdb_t fdbuf, off_t offset, int seekFlags);
 
 #endif // FDB_H

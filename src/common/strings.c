@@ -4,30 +4,89 @@
 #include "fdb.c"
 
 #include "strings.h"
+#include "util.h"
 
-/**
- * @brief Abre o ficheiro STRINGS para leitura.
- *
- * @param write 1 se quisermos abrir o ficheiro para escrita, assim como leitura
- * @return 0 se tudo correu bem, <0 em caso de erro
- */
-int strings_open(int write) {
-    int flags = O_CREAT;
+fdb_t g_pFdbStrings = NULL;
 
-    if(write) flags |= O_RDWR;
-    else flags |= O_RDONLY;
+int string_load(size_t offset, string_t *strRef) {
+    // Assumimos um offset válido!
+    if(strRef == NULL)
+        return -1;
 
-    fdb_t fdbuf;
-    fdb_fopen(&fdbuf, NOME_FICHEIRO_STRINGS, flags, 0666);
-    
+    // Verificar se o ficheiro está aberto
+    if(g_pFdbStrings == NULL)
+        if(file_open(&g_pFdbStrings, NOME_FICHEIRO_STRINGS, 1) != 0)
+            return -2;
+
+    // Carregar efetivamente a string
+    if(fdb_lseek(g_pFdbStrings, offset) != 0)
+        return -3;
+
+    // Ler o tamanho da string a partir do ficheiro
+    size_t length = 0;
+    if(fdb_read(g_pFdbStrings, &length, sizeof(size_t)) != 0)
+        return -4;
+
+    // Verificar se o tamanho é válido
+    if(length <= 0)
+        return -5;
+
+    // Alocar espaço para a string
+    char *string = (char *) malloc(sizeof(char) * length);
+    if(fdb_read(g_pFdbStrings, string, length) != 0)
+        return -6;
+    string[length] = '\0'; // Terminar a string com NULL, pois este byte não é guardado no disco
+
+    // Criar uma referência para a string
+    *strRef = (string_t) malloc(sizeof(struct string_ref));
+    (*strRef)->offset = offset;
+    (*strRef)->length = length;
+    (*strRef)->string = string;
+
+    // Retornar sucesso
+    return 0;
 }
 
-int strings_fill(string_t *string) {
+int string_save(const char *string, string_t *strRef) {
     // Verificar parâmetros
     if(string == NULL)
         return -1;
 
-    // Efetivamente ler o valor da string e preencher o mesmo
+    if(strRef == NULL)
+        return -2;
+
+    // Verificar se o ficheiro está aberto
+    if(g_pFdbStrings == NULL)
+        if(file_open(&g_pFdbStrings, NOME_FICHEIRO_STRINGS, 0) != 0)
+            return -3;
+
+    // Guardar efetivamente a string
+    // Calcular o offset onde a string vai ser escrita
+    off_t offset = fdb_lseek(g_pFdbStrings, 0, SEEK_END);
+    if(offset < 0)
+        return -4;
+
+    // Escrever o tamanho da string
+    size_t length = strlen(string);
+    if(fdb_write(g_pFdbStrings, &length, sizeof(size_t)) != 0)
+        return -5;
+
+    // Escrever a string
+    if(fdb_write(g_pFdbStrings, string, length) != 0)
+        return -6;
+
+    // Criar uma referência para a string,
+    // fazendo uma cópia da string, pois nós queremos controlar
+    // todas as referências de modo a podermos fazer memory management
+    // de strings automaticamente e apenas dentro deste ficheiro
+    *strRef = (string_t) malloc(sizeof(struct string_ref));
+    (*strRef)->offset = offset;
+    (*strRef)->length = length;
+    (*strRef)->string = (const char *) malloc(sizeof(char) * length);
+    memcpy((char *) (*strRef)->string, string, length);
+
+    // Retornar sucesso
+    return 0;
 }
 
 size_t str_split(char *str, char sep, char ***pArgv) {
