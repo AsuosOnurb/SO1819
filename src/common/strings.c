@@ -91,7 +91,16 @@ int string_save(const char *string, string_t *strRef) {
     return 0;
 }
 
-// TODO: int string_free(string_t);
+void string_free(string_t str) {
+    // Verificar parâmetros
+    if(str == NULL)
+        return;
+
+    // Libertar a memória utilizada por esta referência
+    if(str->string != NULL)
+        free((void *) str->string);
+    free(str);
+}
 
 size_t str_split(char *str, char sep, char ***pArgv) {
     // Parse arguments and create argc, argv
