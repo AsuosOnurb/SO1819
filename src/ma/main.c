@@ -1,4 +1,11 @@
-#include "ma.h"
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "../common/fdb.h"
+#include "../common/commands.h"
+#include "../common/strings.h"
+#include "../common/util.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -20,6 +27,7 @@ void alteraPreco(int fd, int argc, char* argvMA[]){
 
 
 void manutencao_artigos(){
+
     size_t number_of_read_bytes;
     int bytes_to_read = 64;
     char *buffer = (char*)malloc(bytes_to_read * sizeof(char));
@@ -36,13 +44,13 @@ void manutencao_artigos(){
         }
 
         while (argvMA[i] != NULL){
-            argvMA[++i] = strtok(NULL," ");  
+            argvMA[++i] = strtok(NULL," ");
         }
-        
+
         argvMA[i-1] = strtok(argvMA[i-1], "\n");
-        
+
         argcMA = i;
-        
+
         if(strcmp (argvMA[0],"i") == 0){
             insereArtigos(fd, argcMA,argvMA, number_of_read_bytes);
         } else if(strcmp (argvMA[0],"n") == 0){
@@ -51,10 +59,16 @@ void manutencao_artigos(){
             alteraPreco(fd,argcMA, argvMA);
         }
     }
+
+    file_close(g_pFdbStrings);
 }
 
-int main(int argc, char* argv[]){
+int main() {
+    // Inicializar os ficheiros necessários
+    file_open(&g_pFdbStrings, "STRINGS", 1);
+
     manutencao_artigos();
+
+    file_close(g_pFdbStrings);
     return 0;
 }
-

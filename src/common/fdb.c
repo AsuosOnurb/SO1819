@@ -86,8 +86,10 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
     ssize_t bytesRead = read(fdbuf->fd, fdbuf->buffer, fdbuf->size);
 
     // Check if the system call succeeded
-    if(bytesRead < 0)
+    if(bytesRead < 0) {
+        perror("read() failed: ");
         return -4; // Syscall failed
+    }
 
     // Check if EOF reached, and set eof flag on struct if so
     if(bytesRead == 0) {
@@ -106,7 +108,7 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
 /**
  * @brief Reads a single character from fdbuf->buffer. Does not perform checks of any kind for performance reasons.
  */
-#define fdbuffer_readc_unchecked(f) f->buffer[f->start++]
+#define fdbuffer_readc_unchecked(f) (f)->buffer[(f)->start++]
 
 char fdb_readc(fdb_t fdbuf) {
     // Check parameters
@@ -129,6 +131,53 @@ char fdb_readc(fdb_t fdbuf) {
     return fdbuffer_readc_unchecked(fdbuf);
 }
 
+ssize_t fdb_read(fdb_t fdbuf, void *buf, size_t size) {
+    // Check parameters
+    if(fdbuf == NULL)
+        return -1;
+
+    if(buf == NULL)
+        return -2;
+
+    // Actually read the data from the file descriptor
+    size_t totalCapacity = size;
+
+    while(size > 0) {
+        // Check if fdbuf->buffer requires refilling
+        if(fdbuf->start >= fdbuf->occupation) {
+            ssize_t bytesRead = fdbuffer_fillbuf(fdbuf);
+
+            // Check if refill was successful
+            if(bytesRead == 0) {
+                // Refill unsuccessful: we have reached EOF.
+                // Return immediately, as there's nothing else to do
+                return totalCapacity - size;
+            } else if(bytesRead < 0) {
+                // Refill unsuccessful: an error occurred.
+                // Return -2 bytes read; the internal fdbuf->buffer has changed and cannot be reliably restored.
+                // Therefore, its behaviour in future calls in undefined.
+                return -2;
+            }
+        }
+
+        size_t bytesAvailable = size;
+
+        // min(size, fdbuf->occupation - fdbuf->start)
+        if(size > fdbuf->occupation - fdbuf->start)
+            bytesAvailable = fdbuf->occupation - fdbuf->start;
+
+        size -= bytesAvailable;
+
+        memcpy(buf, fdbuf->buffer + fdbuf->start, bytesAvailable);
+        fdbuf->start += bytesAvailable;
+
+        buf += bytesAvailable;
+    }
+
+    // Returns the number of bytes effectively read from the buffer
+    return totalCapacity - size;
+}
+
 ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
     // Check parameters
     if(fdbuf == NULL)
@@ -147,7 +196,7 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
         if(fdbuf->start >= fdbuf->occupation) {
             ssize_t bytesRead = fdbuffer_fillbuf(fdbuf);
 
-            // Check if refill was successfull
+            // Check if refill was successful
             if(bytesRead == 0) {
                 // Refill unsuccessful: we have reached EOF.
                 // Return buf as null, and return 0 on this function
@@ -155,7 +204,7 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
                 return 0;
             }
             else if(bytesRead < 0)
-                // Refill unsuccessful: an error has occured.
+                // Refill unsuccessful: an error has occurred.
                 // Return 0 bytes read; the internal fdbuf->buffer has changed and cannot be reliably restored.
                 // Therefore, its behaviour in future calls in undefined.
                 return -2;
@@ -172,11 +221,18 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
         size -= bytesToRead;
         
         // Read character by character until we find a newline, or exceed the buffer's size
-        while(bytesToRead > 0 && *buf != '\n') {
+        while(bytesToRead > 0) {
             *buf = fdbuffer_readc_unchecked(fdbuf);
-            buf++;
-            
             bytesToRead--;
+
+            // This condition MUST be kept inside the loop, otherwise,
+            // buf++ would make it such that, next iteration, *buf != '\n',
+            // and therefore, we would hit an infinite loop of read(2)s until
+            // we exhaust the supplied buffer.
+            if(*buf == '\n')
+                break;
+
+            buf++;
         }
 
         // If bytesToRead == 0, then nothing happens
@@ -186,29 +242,28 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
         size += bytesToRead;
     }
 
-    *buf = '\0'; // Null-terminate the string
+    *(++buf) = '\0'; // Null-terminate the string
 
     // Return the number of bytes effectively read from the buffer
     return totalCapacity - size;
 }
 
-int fdb_writes(fdb_t fdbuf, const char *buf) {
+int fdb_write(fdb_t fdbuf, const void *buf, size_t size) {
     // Check parameters
     if(fdbuf == NULL)
         return -1;
     
     if(buf == NULL)
         return -2;
-    
-    // Get the size of the string to write
-    size_t size = strlen(buf);
 
     // Actually perform the write syscall
     ssize_t writtenBytes = write(fdbuf->fd, buf, size);
 
     // Check if syscall was successful
-    if(writtenBytes < 0 || ((size_t) writtenBytes) != size)
+    if(writtenBytes < 0 || ((size_t) writtenBytes) != size) {
+        perror("write() failed: ");
         return -4;
+    }
 
     // Success!
     return 0;
@@ -245,7 +300,7 @@ int fdb_printf(fdb_t fdbuf, const char *fmt, ...) {
     va_end(argList);
 
     // Write the output string to the buffer
-    int result = fdb_writes(fdbuf, out);
+    int result = fdb_write(fdbuf, out, requiredBytes + 1);
 
     // Free the memory used by the properly formatted string
     free(out);
@@ -254,7 +309,7 @@ int fdb_printf(fdb_t fdbuf, const char *fmt, ...) {
     return result;
 }
 
-int fdb_fopen(const char *path, unsigned int flags, mode_t mode, fdb_t *fdbuf) {
+int fdb_fopen(fdb_t *fdbuf, const char *path, int flags, mode_t mode) {
     // Check parameters
     if(path == NULL)
         return -1;
@@ -266,8 +321,10 @@ int fdb_fopen(const char *path, unsigned int flags, mode_t mode, fdb_t *fdbuf) {
     int fd = open(path, flags, mode);
 
     // Check if open was successful
-    if(fd == -1)
+    if(fd == -1) {
+        perror("open() failed: ");
         return -4;
+    }
     
     // Create a new fdbuf and return it
     return fdb_create(fd, fdbuf);
@@ -282,8 +339,32 @@ int fdb_fclose(fdb_t fdbuf) {
     int res = close(fdbuf->fd);
 
     // Check success
-    if(res == -1)
+    if(res == -1) {
+        perror("close() failed: ");
         return -2;
+    }
     
-    return 0;
+    return fdb_destroy(fdbuf);
+}
+
+int fdb_lseek(fdb_t fdbuf, off_t offset, int seekFlags) {
+    // Verificar parâmetros
+    if(fdbuf == NULL)
+        return -1;
+
+    // Fazer a system call
+    offset = lseek(fdbuf->fd, offset, seekFlags);
+
+    // Verificar se a system call foi bem sucedida
+    if(offset == -1) {
+        perror("lseek() failed: ");
+        return -2;
+    }
+
+    // Invalidar o buffer atualmente lido e guardado no fdbuffer->buffer,
+    // pois este corresponde a dados de uma posição diferente no ficheiro
+    fdbuf->occupation = 0;
+
+    // Sucesso!
+    return offset;
 }

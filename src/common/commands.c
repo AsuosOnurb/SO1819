@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "string_util.h"
+#include "strings.h"
 #include "commands.h"
 
 int execute_command(char *command, int *returnCode) {
