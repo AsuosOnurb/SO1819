@@ -6,30 +6,45 @@
 /** @brief Define o nome do ficheiro de artigos a utilizar. */
 #define NOME_FICHEIRO_ARTIGOS "ARTIGOS"
 
+/** @brief Guarda uma referência ao fdbuffer que lê e escreve para o ficheiro dos ARTIGOS. */
+extern fdb_t g_pFdbArtigos;
+
 /**
  * @brief Define a estrutura de um artigo.
  */
 typedef struct artigo {
     /** @brief O offset no ficheiro de ARTIGOS onde este artigo está guardado. -1 se este artigo ainda não está guardado ou a sua localização é desconhecida. */
     ssize_t offset;
-    /** @brief Referência à string que é o nome do artigo. */
-    string_t nome;
     /** @brief Código do artigo. */
-    int codigo;
+    long codigo;
+    ///** @brief Referência à string que é o nome do artigo. */
+    //string_t nome;
+    /** @brief Posição no ficheiro de STRINGS que contém o nome deste artigo. */
+    ssize_t offsetNome;
     /** @brief Preço do artigo. */
-    int preco;
+    double preco;
 } *artigo_t;
+
+/** @brief Calcula o tamanho de uma entrada no ficheiro ARTIGOS de um único artigo, para ser fácil calcular o offset a partir de um código de um artigo. */
+// #define TAMANHO_ENTRADA_ARTIGO (sizeof(((artigo_t) NULL)->codigo) + sizeof(((artigo_t) NULL)->nome->offset) + sizeof(((artigo_t) NULL)->preco))
+#define TAMANHO_ENTRADA_ARTIGO (sizeof(((artigo_t) NULL)->codigo) + sizeof(((artigo_t) NULL)->offsetNome) + sizeof(((artigo_t) NULL)->preco))
+
+/** @brief Define o offset no ficheiro ARTIGOS onde aparece a primeira entrada de um artigo. */
+#define INICIO_ENTRADAS_ARTIGO sizeof(long)
+
+/** @brief Guarda o próximo código de artigo que pode ser utilizado. Deve ser incrementado quando é adicionado um artigo NOVO ao ficheiro. */
+extern long g_iProximoCodigoUtilizavel;
 
 /**
  * @brief Cria um novo artigo em memória.
  *
- * @param nome Referência (possivelmente com o campo char* string por preencher) à string que é o nome do artigo
  * @param codigo Código do artigo a criar
+ * @param offsetNome Offset no ficheiro de STRINGS referente ao nome deste artigo
  * @param preco Preço por unidade do artigo
  *
  * @return O artigo criado
  */
-artigo_t artigo_new(string_t nome, int codigo, int preco);
+artigo_t artigo_new(long codigo, ssize_t offsetNome, double preco);
 
 /**
  * @brief Liberta a memória utilizada pela estrutura do artigo referenciada.
@@ -40,17 +55,18 @@ void artigo_free(artigo_t artigo);
 
 /**
  * @brief Lê um artigo a partir do ficheiro ARTIGOS.
- * Utiliza o campo offset, que se assume pré-preenchido, para saber qual o offset a carregar.
- * Em alternativa, pode utilizar o campo codigo, no caso de offset == -1, para saber qual o offset a carregar.
  *
+ * @param codigo Código do artigo a carregar
  * @param artigo Onde guardar o artigo carregado
  *
  * @return 0 em caso de sucesso, <0 em caso de erro
  */
-int artigo_load(artigo_t *artigo);
+int artigo_load(long codigo, artigo_t *artigo);
 
 /**
  * @brief Guarda um artigo para o ficheiro ARTIGOS.
+ * Se o código do artigo fornecido for -1, então atribui um novo código ao artigo antes de guardar.
+ * Se o offset do artigo fornecido for -1, então calcula o offset correto a partir do código do artigo.
  *
  * @param artigo O artigo a guarar
  *

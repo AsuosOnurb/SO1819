@@ -4,6 +4,7 @@
 
 #include "../common/fdb.h"
 #include "../common/commands.h"
+#include "../common/artigo.h"
 #include "../common/strings.h"
 #include "../common/util.h"
 

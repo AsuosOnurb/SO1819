@@ -363,7 +363,9 @@ int fdb_lseek(fdb_t fdbuf, off_t offset, int seekFlags) {
 
     // Invalidar o buffer atualmente lido e guardado no fdbuffer->buffer,
     // pois este corresponde a dados de uma posição diferente no ficheiro
+    fdbuf->start = 0;
     fdbuf->occupation = 0;
+    fdbuf->eof = false;
 
     // Sucesso!
     return offset;
