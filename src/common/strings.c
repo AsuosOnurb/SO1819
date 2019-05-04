@@ -10,6 +10,17 @@
 
 fdb_t g_pFdbStrings = NULL;
 
+string_t string_new(ssize_t offset, size_t length, const char *str) {
+    // Criar a referência
+    string_t strRef = (string_t) malloc(sizeof(struct string_ref));
+
+    strRef->offset = offset;
+    strRef->length = length;
+    strRef->string = str;
+
+    return strRef;
+}
+
 int string_load(size_t offset, string_t *strRef) {
     // Assumimos um offset válido!
     if(strRef == NULL)
@@ -40,55 +51,39 @@ int string_load(size_t offset, string_t *strRef) {
     string[length] = '\0'; // Terminar a string com NULL, pois este byte não é guardado no disco
 
     // Criar uma referência para a string
-    *strRef = (string_t) malloc(sizeof(struct string_ref));
-    (*strRef)->offset = offset;
-    (*strRef)->length = length;
-    (*strRef)->string = string;
+    *strRef = string_new(offset, length, string);
 
     // Retornar sucesso
     return 0;
 }
 
-int string_save(const char *string, string_t *strRef) {
+ssize_t string_save(const char *string) {
     // Verificar parâmetros
     if(string == NULL)
         return -1;
 
-    if(strRef == NULL)
-        return -2;
-
     // Verificar se o ficheiro está aberto
     if(g_pFdbStrings == NULL)
         if(file_open(&g_pFdbStrings, NOME_FICHEIRO_STRINGS, 1) != 0)
-            return -3;
+            return -2;
 
     // Guardar efetivamente a string
     // Calcular o offset onde a string vai ser escrita
     off_t offset = fdb_lseek(g_pFdbStrings, 0, SEEK_END);
     if(offset < 0)
-        return -4;
+        return -3;
 
     // Escrever o tamanho da string
     size_t length = strlen(string);
     if(fdb_write(g_pFdbStrings, &length, sizeof(size_t)) != 0)
-        return -5;
+        return -4;
 
     // Escrever a string
     if(fdb_write(g_pFdbStrings, string, length) != 0)
-        return -6;
+        return -5;
 
-    // Criar uma referência para a string,
-    // fazendo uma cópia da string, pois nós queremos controlar
-    // todas as referências de modo a podermos fazer memory management
-    // de strings automaticamente e apenas dentro deste ficheiro
-    *strRef = (string_t) malloc(sizeof(struct string_ref));
-    (*strRef)->offset = offset;
-    (*strRef)->length = length;
-    (*strRef)->string = (const char *) malloc(sizeof(char) * length);
-    memcpy((char *) (*strRef)->string, string, length);
-
-    // Retornar sucesso
-    return 0;
+    // Retornar o offset da string guardada
+    return offset;
 }
 
 void string_free(string_t str) {

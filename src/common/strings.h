@@ -7,7 +7,7 @@
 #define NOME_FICHEIRO_STRINGS "STRINGS"
 
 /** @brief Guarda uma referência ao fdbuffer que lê e escreve para o ficheiro das STRINGS. */
-fdb_t g_pFdbStrings;
+extern fdb_t g_pFdbStrings;
 
 /**
  * @brief Referência a uma string no ficheiro de STRINGS.
@@ -20,6 +20,17 @@ typedef struct string_ref {
     /** @brief Valor efetivo da string, ou NULL se ainda não tiver sido preenchida. */
     const char *string;
 } *string_t;
+
+/**
+ * @brief Cria uma nova referência a uma string do ficheiro STRINGS.
+ *
+ * @param offset O offset onde se encontra esta string
+ * @param length O tamanho da string
+ * @param str O valor desta string
+ *
+ * @return A referência criada
+ */
+string_t string_new(ssize_t offset, size_t length, const char *str);
 
 /**
  * @brief Lê o valor efetivo da string a partir do ficheiro STRINGS.
@@ -35,11 +46,10 @@ int string_load(size_t offset, string_t *strRef);
  * @brief Escreve uma string para o ficheiro de STRINGS.
  *
  * @param string A string a guardar no ficheiro
- * @param strRef Onde guardar a referência da string carregada
  *
- * @return A estrutura referente à string guardada
+ * @return O offset onde a string ficou guardada no ficheiro
  */
-int string_save(const char *string, string_t *strRef);
+ssize_t string_save(const char *string);
 
 /**
  * @brief Liberta a memória utilizada pela referência de uma string.
