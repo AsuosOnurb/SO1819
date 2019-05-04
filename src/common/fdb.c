@@ -247,7 +247,6 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
     // Return the number of bytes effectively read from the buffer
     return totalCapacity - size;
 }
-#include <sys/stat.h>
 
 int fdb_write(fdb_t fdbuf, const void *buf, size_t size) {
     // Check parameters
@@ -340,13 +339,14 @@ int fdb_fclose(fdb_t fdbuf) {
     int res = close(fdbuf->fd);
 
     // Check success
-    if(res == -1)
+    if(res == -1) {
+        perror("close() failed: ");
         return -2;
+    }
     
-    return 0;
+    return fdb_destroy(fdbuf);
 }
 
-/** {@inheritDoc} */
 int fdb_lseek(fdb_t fdbuf, off_t offset, int seekFlags) {
     // Verificar parâmetros
     if(fdbuf == NULL)
@@ -360,6 +360,10 @@ int fdb_lseek(fdb_t fdbuf, off_t offset, int seekFlags) {
         perror("lseek() failed: ");
         return -2;
     }
+
+    // Invalidar o buffer atualmente lido e guardado no fdbuffer->buffer,
+    // pois este corresponde a dados de uma posição diferente no ficheiro
+    fdbuf->occupation = 0;
 
     // Sucesso!
     return offset;

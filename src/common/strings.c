@@ -91,6 +91,8 @@ int string_save(const char *string, string_t *strRef) {
     return 0;
 }
 
+// TODO: int string_free(string_t);
+
 size_t str_split(char *str, char sep, char ***pArgv) {
     // Parse arguments and create argc, argv
     char **argv = malloc(sizeof(char *) * 2);
