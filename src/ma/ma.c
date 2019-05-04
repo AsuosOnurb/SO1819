@@ -107,9 +107,7 @@ void alteraPreco(int fArt, int fStr, int argcMA, char* argvMA[], size_t number_o
     printf("p\n");
 }
 
-
-
-void manutencao_artigos(){
+void manutencao_artigos() {
     size_t number_of_read_bytes;
     
     char *buffer = (char*)malloc(bytes_to_read * sizeof(char));
@@ -156,8 +154,4 @@ void manutencao_artigos(){
     }
     close(fArt);
     close(fStr);
-}
-
-int main(int argc, char* argv[]){
-    manutencao_artigos();
 }
