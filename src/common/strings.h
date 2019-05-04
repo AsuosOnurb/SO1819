@@ -32,7 +32,7 @@ typedef struct string_ref {
 int string_load(size_t offset, string_t *strRef);
 
 /**
- * Escreve uma string para o ficheiro de STRINGS.
+ * @brief Escreve uma string para o ficheiro de STRINGS.
  *
  * @param string A string a guardar no ficheiro
  * @param strRef Onde guardar a referência da string carregada
@@ -40,6 +40,13 @@ int string_load(size_t offset, string_t *strRef);
  * @return A estrutura referente à string guardada
  */
 int string_save(const char *string, string_t *strRef);
+
+/**
+ * @brief Liberta a memória utilizada pela referência de uma string.
+ *
+ * @param str A referência de string cuja memória deve ser libertada
+ */
+void string_free(string_t str);
 
 /**
  * Splits a single string by the delimiter sep, returning an array of arrays for each token in the input string.
