@@ -30,9 +30,15 @@ typedef struct artigo {
 #define TAMANHO_ENTRADA_ARTIGO (sizeof(((artigo_t) NULL)->codigo) + sizeof(((artigo_t) NULL)->offsetNome) + sizeof(((artigo_t) NULL)->preco))
 
 /** @brief Define o offset no ficheiro ARTIGOS onde aparece a primeira entrada de um artigo. */
-#define INICIO_ENTRADAS_ARTIGO sizeof(long)
+#define INICIO_ENTRADAS_ARTIGO 0
 
-/** @brief Guarda o próximo código de artigo que pode ser utilizado. Deve ser incrementado quando é adicionado um artigo NOVO ao ficheiro. */
+/**
+ * @brief Guarda o próximo código de artigo que pode ser utilizado.
+ *
+ * Deve, obrigatóriamente, ter o mesmo tipo de dados do que o field código da estrutura artigo.<br>
+ * Deve ser incrementado quando é adicionado um artigo NOVO ao ficheiro.<br>
+ * É automaticamente inicializada quando necessário.<br>
+ */
 extern long g_iProximoCodigoUtilizavel;
 
 /**
@@ -65,7 +71,8 @@ int artigo_load(long codigo, artigo_t *artigo);
 
 /**
  * @brief Guarda um artigo para o ficheiro ARTIGOS.
- * Se o código do artigo fornecido for -1, então atribui um novo código ao artigo antes de guardar.
+ *
+ * Se o código do artigo fornecido for -1, então atribui um novo código ao artigo antes de guardar.<br>
  * Se o offset do artigo fornecido for -1, então calcula o offset correto a partir do código do artigo.
  *
  * @param artigo O artigo a guarar

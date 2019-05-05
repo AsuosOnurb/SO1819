@@ -59,7 +59,7 @@ ssize_t string_save(const char *string);
 void string_free(string_t str);
 
 /**
- * Splits a single string by the delimiter sep, returning an array of arrays for each token in the input string.
+ * @brief Splits a single string by the delimiter sep, returning an array of arrays for each token in the input string.
  *
  * @param str The string to parse
  * @param sep The delimiter to split by
@@ -70,7 +70,7 @@ void string_free(string_t str);
 size_t str_split(char *str, char sep, char ***pArgv);
 
 /**
- * Frees any dynamically-allocated array of strings.
+ * @brief Frees any dynamically-allocated array of strings.
  * 
  * @param argv The array of strings to free
  */
