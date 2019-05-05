@@ -40,13 +40,15 @@ void venda_free(venda_t venda);
 
 /**
  * @brief Lê uma venda a partir do ficheiro VENDAS.
+ *
  * Utiliza o campo offset, que se assume pré-preenchido, para saber qual o offset a carregar.
  *
+ * @param offset O offset de onde carregar a respetiva venda
  * @param venda Onde guardar os dados da venda carregados
  *
  * @return 0 em caso de sucesso, <0 em caso de erro
  */
-int venda_load(venda_t *venda);
+int venda_load(ssize_t offset, venda_t *venda);
 
 /**
  * @brief Guarda uma venda para o ficheiro VENDAS.

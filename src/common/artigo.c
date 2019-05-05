@@ -1,13 +1,54 @@
-#include <string.h>
 #include <stdlib.h>
-#include <zconf.h>
-#include <errno.h>
+
+#include "fdb.h"
 #include "artigo.h"
 #include "util.h"
 
 fdb_t g_pFdbArtigos = NULL;
 
 long g_iProximoCodigoUtilizavel = 0;
+
+/**
+ * @brief Função responsável por inicializar a partir do disco o ficheiro de ARTIGOS.<br>
+ * É também responsável por obter a partir do ficheiro, aquando da sua inicialização,
+ * o próximo código disponível para utilizar por um novo artigo que poderá vir a ser criado.<br>
+ *
+ * O próximo código utilizável é calculado fazendo lseek() para a última entrada do ficheiro,
+ * e lendo o código do último artigo inserido no ficheiro, e somando-lhe uma unidade.
+ *
+ * @return 0 em caso de sucesso, <0 em caso de erro
+ */
+int inicializar_ficheiro_artigos() {
+    // Abrir um file descriptor associado ao ficheiro
+    if(file_open(&g_pFdbArtigos, NOME_FICHEIRO_ARTIGOS, 1) != 0)
+        return -1;
+
+    // Carregar o código do próximo código utilizável:
+    // calculado a partir de ler a última entrada presente no ficheiro
+    // e somando uma unidade ao código da última entrada
+
+    // Fazer lseek para o fim do ficheiro
+    ssize_t offset = fdb_lseek(g_pFdbArtigos, 0, SEEK_END);
+    if(offset < 0)
+        return -2;
+
+    // Calcular o offset da última entrada
+    offset -= TAMANHO_ENTRADA_ARTIGO;
+
+    // Fazer lseek para essa entrada
+    if(fdb_lseek(g_pFdbArtigos, offset, SEEK_SET) != offset)
+        return -3;
+
+    // Ler o código da última entrada no disco
+    if(fdb_read(g_pFdbArtigos, &g_iProximoCodigoUtilizavel, sizeof(g_iProximoCodigoUtilizavel)) <= 0)
+        return -4;
+
+    // O próximo código utilizável é o código da última entrada no disco somado de uma unidade
+    g_iProximoCodigoUtilizavel++;
+
+    // Sucesso!
+    return 0;
+}
 
 artigo_t artigo_new(long codigo, ssize_t offsetNome, double preco) {
     // Criar a estrutura com o artigo
@@ -41,7 +82,7 @@ int artigo_load(long codigo, artigo_t *artigoRef) {
 
     // Verificar se o ficheiro está aberto
     if(g_pFdbArtigos == NULL)
-        if(file_open(&g_pFdbArtigos, NOME_FICHEIRO_ARTIGOS, 1) != 0)
+        if(inicializar_ficheiro_artigos() != 0)
             return -3;
 
     // Verificar se o código gera um offset válido
@@ -96,19 +137,17 @@ int artigo_save(artigo_t artigo) {
 
     // Verificar se o ficheiro está aberto
     if(g_pFdbArtigos == NULL)
-        if(file_open(&g_pFdbArtigos, NOME_FICHEIRO_ARTIGOS, 1) != 0)
+        if(inicializar_ficheiro_artigos() != 0)
             return -2;
 
     // Verificar se o código do artigo é válido (ou seja, se este artigo já existe no ficheiro)
     if(artigo->codigo == -1) {
         // Atribuir um novo código
         artigo->codigo = g_iProximoCodigoUtilizavel++;
-
-        // TODO: Guardar o proximo codigo de artigo utilizavel algures?
     }
 
     // Verificar se o offset do artigo é válido
-    // caso não seja válido, acalcular a partir do código
+    // caso não seja válido, calcular a partir do código
     if(artigo->offset == -1) {
         // O artigo não existe no ficheiro,
         // então temos de arranjar um novo offset, logo, fazer lseek(..., SEEK_END)
@@ -117,22 +156,22 @@ int artigo_save(artigo_t artigo) {
 
     // Mover o apontador para a entrada correta para escrita
     if(fdb_lseek(g_pFdbArtigos, artigo->offset, SEEK_SET) != artigo->offset)
-        return -3;
+        return -5;
 
     // Efetivamente escrever o artigo no ficheiro
     // O formato de uma entrada deverá ser: codigo, endereço do nome, preco por unidade
 
     // Escrever código
     if(fdb_write(g_pFdbArtigos, &artigo->codigo, sizeof(artigo->codigo)) != 0)
-        return -4;
+        return -6;
 
     // Escrever endereço do nome
     if(fdb_write(g_pFdbArtigos, &artigo->offsetNome, sizeof(artigo->offsetNome)) != 0)
-        return -5;
+        return -7;
 
     // Escrever preço por unidade
     if(fdb_write(g_pFdbArtigos, &artigo->preco, sizeof(artigo->preco)) != 0)
-        return -6;
+        return -8;
 
     // Sucesso!
     return 0;

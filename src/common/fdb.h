@@ -1,12 +1,16 @@
 #ifndef FDB_H
 #define FDB_H
 
-#include <sys/types.h>
 #include <stdbool.h>
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
 
 /**
  * @brief Define um "file descriptor buffer" (leia-se fdbuffer) com um descritor de ficheiro associado, na mesma ideia do que a estrutura FILE do C.
- * Esta estrutura tem capacidade de buffering em memória, para evitar fazer reads desnecessários, e deste modo aumentar a performance.
+ *
+ * Esta estrutura tem capacidade de buffering em memória, para evitar fazer reads desnecessários, e deste modo aumentar a performance.<br>
  * Esta estrutura tem também a capacidade de ler e escrever dados de vários tipos de e para o descritor de ficheiros associado.
  */
 typedef struct fdb {
@@ -54,7 +58,8 @@ char fdb_readc(fdb_t fdbuf);
 
 /**
  * @brief Lê o número de bytes especificado a partir do descritor de ficheiros associado ao fdbuffer especificado.
- * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.
+ *
+ * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.<br>
  * Pode ler menos bytes do que {@param size} indica; é intencional, pois podemos ter chegado a EOF.
  *
  * @param fdbuf O fdbuffer a partir do qual ler
@@ -67,7 +72,8 @@ ssize_t fdb_read(fdb_t fdbuf, void *buf, size_t size);
 
 /**
  * @brief Lẽ uma string a partir do descritor associado.
- * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.
+ *
+ * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.<br>
  * Pode ler menos bytes do que {@param size} indica; é intencional, pois podemos ter chegado a EOF, ou a string pode ser menor do que o parâmetro {@param size}.
  *
  * @param fdbuf O fdbuffer a partir do qual ler
@@ -80,7 +86,8 @@ ssize_t fdb_reads(fdb_t fdbuf, char *buf, size_t size);
 
 /**
  * @brief Lẽ uma linha (que termina com \n) a partir do descritor associado.
- * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.
+ *
+ * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.<br>
  * Pode ler menos bytes do que {@param size} indica; é intencional, pois podemos ter chegado a EOF, ou a string pode ser menor do que o parâmetro {@param size}.
  *
  * @param fdbuf O fdbuffer a partir do qual ler
@@ -93,6 +100,7 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size);
 
 /**
  * @brief Escreve para o descritor de ficheiros os dados especificados.
+ *
  * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.
  *
  * @param fdbuf O fdbuffer para o qual escrever
@@ -105,6 +113,7 @@ int fdb_write(fdb_t fdbuf, const void *buf, size_t size);
 
 /**
  * @brief Escreve para o descritor de ficheiros uma string formatada no mesmo estilo da função printf().
+ *
  * Bloqueia dependendo da flag de bloqueio do descritor de ficheiro associado.
  *
  * @param fdbuf O fdbuffer para o qual escrever

@@ -40,17 +40,19 @@ void stock_free(stock_t stock);
 
 /**
  * @brief Carrega uma entrada de stock a partir do ficheiro de STOCKS.
- * Utiliza o campo offset, que se assume pré-preenchido, para saber qual o offset a carregar.
- * Em alternativa, pode utilizar o campo artigo (especificamente, o código do artigo), no caso de offset == -1, para saber qual o offset a carregar.
  *
- * @param stock O stock para o qual carregar os dados do ficheiro
+ * Utiliza o parâmetro {@param codigo} do artigo dado para determinar qual o offset a carregar.
+ *
+ * @param artigo O artigo cujo stock deve ser carregado
+ * @param stock Onde guardar o stock carregado
  *
  * @return 0 se correu tudo bem; <0 em caso de erro
  */
-int stock_load(stock_t *stock);
+int stock_load(artigo_t artigo, stock_t *stock);
 
 /**
  * @brief Guarda uma entrada de stock no ficheiro de STOCKS.
+ *
  * Utiliza o campo offset para saber qual o offset em que guardar a entrada.
  *
  * @param stock A entrada de stock a guardar no ficheiro
