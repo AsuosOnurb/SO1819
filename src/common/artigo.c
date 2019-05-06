@@ -8,16 +8,6 @@ fdb_t g_pFdbArtigos = NULL;
 
 long g_iProximoCodigoUtilizavel = 0;
 
-/**
- * @brief Função responsável por inicializar a partir do disco o ficheiro de ARTIGOS.<br>
- * É também responsável por obter a partir do ficheiro, aquando da sua inicialização,
- * o próximo código disponível para utilizar por um novo artigo que poderá vir a ser criado.<br>
- *
- * O próximo código utilizável é calculado fazendo lseek() para a última entrada do ficheiro,
- * e lendo o código do último artigo inserido no ficheiro, e somando-lhe uma unidade.
- *
- * @return 0 em caso de sucesso, <0 em caso de erro
- */
 int inicializar_ficheiro_artigos() {
     // Abrir um file descriptor associado ao ficheiro
     if(file_open(&g_pFdbArtigos, NOME_FICHEIRO_ARTIGOS, 1) != 0)

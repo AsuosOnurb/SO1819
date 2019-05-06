@@ -42,6 +42,18 @@ typedef struct artigo {
 extern long g_iProximoCodigoUtilizavel;
 
 /**
+ * @brief Função responsável por inicializar a partir do disco o ficheiro de ARTIGOS.<br>
+ * É também responsável por obter a partir do ficheiro, aquando da sua inicialização,
+ * o próximo código disponível para utilizar por um novo artigo que poderá vir a ser criado.<br>
+ *
+ * O próximo código utilizável é calculado fazendo lseek() para a última entrada do ficheiro,
+ * e lendo o código do último artigo inserido no ficheiro, e somando-lhe uma unidade.
+ *
+ * @return 0 em caso de sucesso, <0 em caso de erro
+ */
+int inicializar_ficheiro_artigos();
+
+/**
  * @brief Cria um novo artigo em memória.
  *
  * @param codigo Código do artigo a criar
