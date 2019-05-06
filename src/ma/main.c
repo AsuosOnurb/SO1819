@@ -16,18 +16,21 @@ int main(int argc, const char *argv[]) {
     ssize_t saveSuccess = string_save("O Linhares é gay");
     int loadSuccess = string_load(saveSuccess, &s1);
 
-    printf("Sucesso save: %ld, sucesso load: %d\n", saveSuccess, loadSuccess);
+    printf("Sucesso string save: %ld (offset), sucesso load: %d\n", saveSuccess, loadSuccess);
 
     file_close(g_pFdbStrings);
 
-    file_open(&g_pFdbArtigos, "ARTIGOS", 1);
+    // file_open(&g_pFdbArtigos, "ARTIGOS", 1);
+    inicializar_ficheiro_artigos();
 
-    artigo_t artigo = artigo_new(g_iProximoCodigoUtilizavel++, saveSuccess, 1.0f);
+    artigo_t artigo = artigo_new(-1, saveSuccess, 1.0f);
 
     int artSaveSuccess = artigo_save(artigo);
+    ssize_t offsetArtigoSaved = artigo->offset;
     int artLoadSuccess = artigo_load(g_iProximoCodigoUtilizavel - 1, &artigo);
 
     printf("Sucesso artigo save: %d, sucesso load: %d\n", artSaveSuccess, artLoadSuccess);
+    printf("Artigo saved offset: %ld\n", offsetArtigoSaved);
 
     file_close(g_pFdbArtigos);
 
