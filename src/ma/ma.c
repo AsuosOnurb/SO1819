@@ -5,51 +5,77 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "ma.h"
+#include "../common/artigo.h"
 
 #define bytes_to_read 64
+
 #define MAX (1024*1024)
 
 /**
  * Vai inserir no ficheiro ARTIGOS: Código, endereço da posição do nome no ficheiro STRINGS e preço.
  * Vai inserir no ficheiro SRTINGS: Endereço de posição do nome do artigo e o nome do artigo.
- */ 
+ */
 
+
+/*
 void insereArtigos(int fArt, int fStr, int argcMA, char* argvMA[], size_t number_of_read_bytes, int codigo, int endereco){
+
     char *str = (char*)malloc(number_of_read_bytes*sizeof(char));
     char *art = (char*)malloc(number_of_read_bytes*sizeof(char));
     int bytes_to_write_str, bytes_to_write_art;
 
-    /**
-     * formata tudo para uma string
-     */ 
+    // formata tudo para uma string
     sprintf(str, "%d %s\n", endereco, argvMA[1]);
     sprintf(art, "%d %d %s\n", codigo, endereco, argvMA[2]);
 
     bytes_to_write_str = strlen(str);
     bytes_to_write_art = strlen(art);
-    /**
-     * escreva para o ficheiro STRINGS
-     */
+
+     // escreva para o ficheiro STRINGS
+
     size_t strSize = write(fStr, str, bytes_to_write_str);
     
-    /**
-     * escreve para o ficheiro ARTIGOS
-     */
+
+     // escreve para o ficheiro ARTIGOS
     size_t artSize = write(fArt, art, bytes_to_write_art);
 
-    /**
-     * Verifica se os ficheiros foram escritos ou não;
-     * Se o resultado da escrita for -1 deu erro na escrita e é exibido o erro
-     * Se o resultado da escrita for 0, quer dizer que o ficheiro não foi escrito
-     */ 
+
+     // Verifica se os ficheiros foram escritos ou não;
+     // Se o resultado da escrita for -1 deu erro na escrita e é exibido o erro
+     // Se o resultado da escrita for 0, quer dizer que o ficheiro não foi escrito
+
     if (strSize == -1 || artSize == -1){
         printf("Erro %d: %s", errno, strerror(errno));
     } else if(strSize == 0 || artSize == 0){
         printf("Erro %d: %s", errno, strerror(errno));
     }
-    
 
 }
+ */
+
+artigo_t insere_artigo(char *nomeArtigo, double precoArtigo) {
+    // Criar string nova
+    ssize_t offsetNome = string_save(nomeArtigo);
+    if (offsetNome < 0) {
+        printf("Algo correu mal: insere_artigo():59 = %ld\n", offsetNome);
+
+    }
+
+    // Criar o artigo propriamente dito
+    artigo_t novoArtigo = artigo_new(-1, offsetNome, precoArtigo);
+
+    // Guardar o artigo
+    int errorCode = artigo_save(novoArtigo);
+    if (errorCode < 0) {
+        printf("Algo correu mal: insere_artigo():68 = %d\n", errorCode);
+
+    }
+
+    return novoArtigo;
+
+}
+
+
 /**
  * Vai alterar o nome de um dado artigo.
  * Primeiro, acrescenta ao ficheiro STRINGS e atribui-lhe um novo endereco.
@@ -142,7 +168,12 @@ void manutencao_artigos() {
         argcMA = i;
         
         if(strcmp (argvMA[0],"i") == 0){
-            insereArtigos(fArt, fStr, argcMA,argvMA, number_of_read_bytes, codigo, endereco);
+            char *nomeArtigo = argvMA[1];
+            double precoArtigo;
+            sscanf(argvMA[2], "%lf", &precoArtigo); // Conversão da string para double
+
+            insere_artigo(nomeArtigo, precoArtigo);
+
         } else if(strcmp (argvMA[0],"n") == 0){
             alteraNome(fArt, fStr, argcMA,argvMA, codigo, endereco, number_of_read_bytes);
         } else if (strcmp (argvMA[0],"p") == 0){
