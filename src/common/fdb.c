@@ -110,6 +110,7 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
  */
 #define fdbuffer_readc_unchecked(f) (f)->buffer[(f)->start++]
 
+
 char fdb_readc(fdb_t fdbuf) {
     // Check parameters
     if(fdbuf == NULL)
