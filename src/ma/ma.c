@@ -59,7 +59,7 @@ void insereArtigos(int fArt, int fStr, int argcMA, char* argvMA[], size_t number
 }
  */
 
-artigo_t insere_artigo(char *nomeArtigo, double precoArtigo) {
+long insere_artigo(char *nomeArtigo, double precoArtigo) {
     // Criar string nova
     ssize_t offsetNome = string_save(nomeArtigo);
     if (offsetNome < 0) {
@@ -74,10 +74,9 @@ artigo_t insere_artigo(char *nomeArtigo, double precoArtigo) {
     int errorCode = artigo_save(novoArtigo);
     if (errorCode < 0) {
         printf("Algo correu mal: insere_artigo():68 = %d\n", errorCode);
-
     }
 
-    return novoArtigo;
+    return novoArtigo->codigo;
 
 }
 
@@ -86,7 +85,8 @@ artigo_t insere_artigo(char *nomeArtigo, double precoArtigo) {
  * Vai alterar o nome de um dado artigo.
  * Primeiro, acrescenta ao ficheiro STRINGS e atribui-lhe um novo endereco.
  * Segundo, vai atualizar o ficheiro Artigos com o novo endereço do nome do artigo.
- */ 
+ */
+ /*
 void alteraNome(int fArt,int fStr, int argcMA, char* argvMA[], int codigo, int endereco, size_t number_of_read_bytes){
     char *str = (char*)malloc(number_of_read_bytes*sizeof(char));
     char *art = (char*)malloc(number_of_read_bytes*sizeof(char));
@@ -103,31 +103,31 @@ void alteraNome(int fArt,int fStr, int argcMA, char* argvMA[], int codigo, int e
         printf("Erro %d: %s\n", errno, strerror(errno));
         //return errno;
     }
-    /**
-     * Formata tudo para uma string
-     */ 
+
+     //Formata tudo para uma string
+
     sprintf(str, "%d %s\n", endereco, argvMA[2]);
     bytes_to_write = strlen(str);
 
-    /**
-     * Acrescenta o nome no ficheiro de strings e, 
-     * é atribuído um novo endereco ao nome do artigo
-     */ 
+
+     //Acrescenta o nome no ficheiro de strings e,
+     //é atribuído um novo endereco ao nome do artigo
+
     size_t strSize = write(fStr, str, bytes_to_write);
 
     
-    /**
-     * Vai procurar pelo código do nome a alterar.
-     */ 
+
+     // Vai procurar pelo código do nome a alterar.
+
     while((number_of_bytes = read(fart, buffer, bytes_to_read)) > 0){
         if (buffer[0] == atoi(argvMA[1])){
             tmp = buffer;
         }
     }
 
-    /**
-     * Adiciona o novo endereço à linha a alterar
-     */ 
+
+     // Adiciona o novo endereço à linha a alterar
+
     sprintf(art_new, "%d %d %d", atoi(argvMA[1]), endereco, tmp[2]);
     printf("%s\n", art_new);
 
@@ -135,20 +135,23 @@ void alteraNome(int fArt,int fStr, int argcMA, char* argvMA[], int codigo, int e
 
 
 }
+*/
 
-
-void alteraNome(char** argvMA){
+int alteraNome(char** argvMA){
     size_t offsetName = string_save(argvMA[1]);
 
     if (offsetName < 0){
-        printf("Linha 115. alteraNome()\nErro %d: %s", offsetName, strerror(errno));
+        printf("Linha 115. alteraNome()\nErro %ld: %s", offsetName, strerror(errno));
+        return 1;
     }
 
+    long codigo = sscanf(argvMA[1], "ld", &codigo);
     artigo_t artigo;
-    int offset = artigo_load(argvMA[1], &artigo);
+    int offset = artigo_load(codigo, &artigo);
 
     if (offset < 0){
         printf("Linha 121. alteraNome()\nErro %d: %s", offset, strerror(errno));
+        return 2;
     }
 
     artigo->offsetNome = offsetName;
@@ -157,63 +160,32 @@ void alteraNome(char** argvMA){
 
     artigo_free(artigo);
 
+    return 0;
 }
 
 
-void alteraPreco(int fArt, int fStr, int argcMA, char* argvMA[], size_t number_of_read_bytes, int codigo, int endereco){
-    printf("p\n");
-}
+int alteraPreco(char** argvMA){
+    long codigo = sscanf(argvMA[1], "ld", &codigo);
+    artigo_t artigo;
+    int offset = artigo_load(codigo, &artigo);
 
-void manutencao_artigos() {
-    size_t number_of_read_bytes;
-    
-    char *buffer = (char*)malloc(bytes_to_read * sizeof(char));
-    int argcMA;
-    char **argvMA = (char**)malloc((bytes_to_read/2) * sizeof(char*));
-    int fArt = open("ARTIGOS", O_CREAT | O_RDWR | O_TRUNC, 0666);
-    int fStr = open("STRINGS", O_CREAT | O_RDWR | O_TRUNC, 0666);
-    int i, codigo, endereco;
-    codigo = 1;
-    endereco = 1;
-
-    //verifica se cria o ficheiro ARTIGOS
-    if ((fArt == -1) || (fStr == -1)){
-        printf("Erro %d: %s\n", errno, strerror(errno));
-        //return errno;
+    if (offset < 0){
+        printf("Linha 166. alteraPreco()\n Erro %d: %s", offset, strerror((errno)));
     }
 
-    //verifica se cria o ficheiro SRTINGS
-    while ((number_of_read_bytes = read(0, buffer, bytes_to_read)) > 0){
-        i = 0;
-        argvMA[i] = strtok(buffer," ");
-        if (strlen(argvMA[i]) == number_of_read_bytes) {
-            argvMA[i] = strtok(argvMA[i], "\n");
-        }
+    double precoArtigo = sscanf(argvMA[2], "%le", &precoArtigo);
 
-        while (argvMA[i] != NULL){
-            argvMA[++i] = strtok(NULL," ");  
-        }
-        
-        argvMA[i-1] = strtok(argvMA[i-1], "\n");
-        
-        argcMA = i;
-        
-        if(strcmp (argvMA[0],"i") == 0){
-            char *nomeArtigo = argvMA[1];
-            double precoArtigo;
-            sscanf(argvMA[2], "%lf", &precoArtigo); // Conversão da string para double
+    artigo->preco = precoArtigo;
 
-            insere_artigo(nomeArtigo, precoArtigo);
+    artigo_save(artigo);
 
-        } else if(strcmp (argvMA[0],"n") == 0){
-            alteraNome(fArt, fStr, argcMA,argvMA, codigo, endereco, number_of_read_bytes);
-        } else if (strcmp (argvMA[0],"p") == 0){
-            alteraPreco(fArt, fStr, argcMA, argvMA, number_of_read_bytes, codigo, endereco);
-        }
+    artigo_free(artigo);
 
-        codigo++;
-        endereco++;
-    }
-    close(fArt);
-    close(fStr);
+    return 0;
 }
+
+void todosCodigos();
+
+
+
+
