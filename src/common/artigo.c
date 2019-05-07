@@ -44,7 +44,11 @@ artigo_t artigo_new(long codigo, ssize_t offsetNome, double preco) {
     // Criar a estrutura com o artigo
     artigo_t artigo = (artigo_t) malloc(sizeof(struct artigo));
 
-    artigo->offset = -1;
+    if(codigo == -1)
+        artigo->offset = -1;
+    else
+        artigo->offset = TAMANHO_ENTRADA_ARTIGO * codigo + INICIO_ENTRADAS_ARTIGO;
+
     artigo->codigo = codigo;
     // artigo->nome = nome;
     artigo->offsetNome = offsetNome;
@@ -83,13 +87,11 @@ int artigo_load(long codigo, artigo_t *artigoRef) {
         return -4;
 
     // Criar uma referência para o artigo
-    artigo_t artigo = artigo_new(0, -1, -1);
+    artigo_t artigo = artigo_new(codigo, -1, -1);
 
     // Carregar os vários membros do artigo
 
-    // Carregar offset
-    artigo->offset = offset;
-
+    /*
     // Carregar codigo
     if(fdb_read(g_pFdbArtigos, &artigo->codigo, sizeof(artigo->codigo)) <= 0) {
         artigo_free(artigo);
@@ -102,6 +104,7 @@ int artigo_load(long codigo, artigo_t *artigoRef) {
         artigo_free(artigo);
         return -6;
     }
+    */
 
     // Carregar offset do nome
     if(fdb_read(g_pFdbArtigos, &artigo->offsetNome, sizeof(artigo->offsetNome)) <= 0) {
@@ -151,10 +154,12 @@ int artigo_save(artigo_t artigo) {
     // Efetivamente escrever o artigo no ficheiro
     // O formato de uma entrada deverá ser: codigo, endereço do nome, preco por unidade
 
+    /*
     // Escrever código
     if(fdb_write(g_pFdbArtigos, &artigo->codigo, sizeof(artigo->codigo)) != 0)
         return -6;
-
+    */
+    
     // Escrever endereço do nome
     if(fdb_write(g_pFdbArtigos, &artigo->offsetNome, sizeof(artigo->offsetNome)) != 0)
         return -7;

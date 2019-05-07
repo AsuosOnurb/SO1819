@@ -27,7 +27,8 @@ typedef struct artigo {
 
 /** @brief Calcula o tamanho de uma entrada no ficheiro ARTIGOS de um único artigo, para ser fácil calcular o offset a partir de um código de um artigo. */
 // #define TAMANHO_ENTRADA_ARTIGO (sizeof(((artigo_t) NULL)->codigo) + sizeof(((artigo_t) NULL)->nome->offset) + sizeof(((artigo_t) NULL)->preco))
-#define TAMANHO_ENTRADA_ARTIGO (sizeof(((artigo_t) NULL)->codigo) + sizeof(((artigo_t) NULL)->offsetNome) + sizeof(((artigo_t) NULL)->preco))
+// #define TAMANHO_ENTRADA_ARTIGO (sizeof(((artigo_t) NULL)->codigo) + sizeof(((artigo_t) NULL)->offsetNome) + sizeof(((artigo_t) NULL)->preco))
+#define TAMANHO_ENTRADA_ARTIGO (sizeof(ssize_t) + sizeof(double))
 
 /** @brief Define o offset no ficheiro ARTIGOS onde aparece a primeira entrada de um artigo. */
 #define INICIO_ENTRADAS_ARTIGO 0
