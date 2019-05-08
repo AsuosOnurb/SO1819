@@ -12,6 +12,12 @@
 #include "ma.c"
 
 int main(int argc, const char *argv[]) {
+    if (argc > 1){
+        printf("Erro %d: %s",errno, strerror(errno));
+        return errno;
+    }
+
+
     setlocale(LC_ALL, "Portuguese");
     size_t number_of_read_bytes;
     char *buffer = (char*)malloc(bytes_to_read * sizeof(char));
@@ -69,9 +75,10 @@ int main(int argc, const char *argv[]) {
             } else {
                 printf("O nome do seu artigo não foi alterado. Tente novamente!\nErro %d: erro no alteraPreco()", resultado);
             }
-        } else if(strcmp(argvMA[0], "a") == 0){
-            todosCodigos();
         }
+        /*else if(strcmp(argvMA[0], "a") == 0){
+            todosCodigos();
+        }*/
 
 
     }
