@@ -3,9 +3,7 @@
 #include "../common/artigo.h"
 #include "../common/stock.h"
 
-void mostra_info_artigo(long codigoArtigo) {
-
-
+void mostra_info_stock(long codigoArtigo) {
     artigo_t artigo;
 
     int errorVal = artigo_load(codigoArtigo, &artigo);
@@ -14,7 +12,8 @@ void mostra_info_artigo(long codigoArtigo) {
         return;
     }
 
-    printf("Preço do artigo: %f.\n", artigo->preco);
+    // Print do preço
+    printf("%f.\n", artigo->preco);
     artigo_free(artigo);
 
     stock_t stock;
@@ -24,7 +23,37 @@ void mostra_info_artigo(long codigoArtigo) {
         return;
     }
 
-    printf("Stock disponível: %ld.\n", stock->quantidade);
+    //Print da quantidade no stock
+    printf("%ld.\n", stock->quantidade);
     stock_free(stock);
 
+}
+
+int atualiza_mostra_stock(long codigoArtigo, long acrescento) {
+    stock_t stock;
+    int errorVal = stock_load(codigoArtigo, &stock);
+    if (errorVal < 0) {
+        printf("Erro: atualiza_mostra_stock():34 = %d\n", errorVal);
+        return (-1);
+    }
+
+    // Modificar o stock. Obviamente não podemos ter stock negativo.
+    if (stock->quantidade + acrescento < 0) {
+        // Zeramos o stock.
+        stock->quantidade = 0;
+        return (-1);
+    } else
+        stock->quantidade += acrescento;
+
+    errorVal = stock_save(stock);
+    if (errorVal < 0) {
+        printf("Erro: atualiza_mostra_stock():44 = %d\n", errorVal);
+        return (-1);
+    }
+
+    printf("%ld.\n", stock->quantidade);
+
+    stock_free(stock);
+
+    return 0;
 }
