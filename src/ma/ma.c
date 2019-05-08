@@ -5,13 +5,8 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "ma.h"
-#include "../common/artigo.h"
 
-#include "../common/fdb.h"
-#include "../common/commands.h"
-#include "../common/artigo.h"
-#include "../common/strings.h"
-#include "../common/util.h"
+
 
 #define bytes_to_read 64
 
