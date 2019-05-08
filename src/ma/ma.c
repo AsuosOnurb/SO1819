@@ -140,7 +140,7 @@ int alteraNome(char** argvMA){
         return 1;
     }
 
-    long codigo = sscanf(argvMA[1], "%ld", &codigo);
+    long codigo = strtol(argvMA[1], NULL, 10);
     artigo_t artigo;
     int offset = artigo_load(codigo, &artigo);
 
@@ -151,7 +151,11 @@ int alteraNome(char** argvMA){
 
     artigo->offsetNome = offsetName;
 
-    artigo_save(artigo);
+    int erroVal = artigo_save(artigo);
+
+    if (erroVal < 0){
+        printf("Linha 154. alteraPreco()\n Erro %d: %s", erroVal, strerror((errno)));
+    }
 
     artigo_free(artigo);
 
@@ -160,7 +164,7 @@ int alteraNome(char** argvMA){
 
 
 int alteraPreco(char** argvMA){
-    long codigo = sscanf(argvMA[1], "%ld", &codigo);
+    long codigo = strtol(argvMA[1], NULL, 10);
     artigo_t artigo;
     int offset = artigo_load(codigo, &artigo);
 
@@ -168,11 +172,15 @@ int alteraPreco(char** argvMA){
         printf("Linha 166. alteraPreco()\n Erro %d: %s", offset, strerror((errno)));
     }
 
-    double precoArtigo = sscanf(argvMA[2], "%le", &precoArtigo);
+    double precoArtigo = strtod(argvMA[2], NULL);
 
     artigo->preco = precoArtigo;
 
-    artigo_save(artigo);
+    int erroVal = artigo_save(artigo);
+
+    if (erroVal < 0){
+        printf("Linha 175. alteraPreco()\n Erro %d: %s", erroVal, strerror((errno)));
+    }
 
     artigo_free(artigo);
 
