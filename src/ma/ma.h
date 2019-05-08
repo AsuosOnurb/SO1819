@@ -12,7 +12,17 @@
  */
 artigo_t insere_artigo(char *nomeArtigo, double precoArtigo);
 
+/**
+ * Altera o nome de um dado artigo.
+ * @param argvMA O comando em argvMA.
+ */
+void altera_nome(char **argvMA);
 
-
+/**
+ * Altera o preço de um dado artigo.
+ * @param argvMA O comando em argvMA.
+ * @param novoPreco O novo preço do artigo.
+ */
+void altera_preco(char **argvMA, double novoPreco);
 
 #endif //SO1819_MA_H

@@ -76,11 +76,11 @@ artigo_t insere_artigo(char *nomeArtigo, double precoArtigo) {
 }
 
 
-/**
+/*
  * Vai alterar o nome de um dado artigo.
  * Primeiro, acrescenta ao ficheiro STRINGS e atribui-lhe um novo endereco.
  * Segundo, vai atualizar o ficheiro Artigos com o novo endereço do nome do artigo.
- */ 
+
 void alteraNome(int fArt,int fStr, int argcMA, char* argvMA[], int codigo, int endereco, size_t number_of_read_bytes){
     char *str = (char*)malloc(number_of_read_bytes*sizeof(char));
     char *art = (char*)malloc(number_of_read_bytes*sizeof(char));
@@ -97,31 +97,26 @@ void alteraNome(int fArt,int fStr, int argcMA, char* argvMA[], int codigo, int e
         printf("Erro %d: %s\n", errno, strerror(errno));
         //return errno;
     }
-    /**
-     * Formata tudo para uma string
-     */ 
+
+    // Formata tudo para uma string
     sprintf(str, "%d %s\n", endereco, argvMA[2]);
     bytes_to_write = strlen(str);
 
-    /**
-     * Acrescenta o nome no ficheiro de strings e, 
-     * é atribuído um novo endereco ao nome do artigo
-     */ 
+
+     // Acrescenta o nome no ficheiro de strings e é atribuído um novo endereco ao nome do artigo
     size_t strSize = write(fStr, str, bytes_to_write);
 
-    
-    /**
-     * Vai procurar pelo código do nome a alterar.
-     */ 
+
+
+     // Vai procurar pelo código do nome a alterar.
     while((number_of_bytes = read(fart, buffer, bytes_to_read)) > 0){
         if (buffer[0] == atoi(argvMA[1])){
             tmp = buffer;
         }
     }
 
-    /**
-     * Adiciona o novo endereço à linha a alterar
-     */ 
+
+    // Adiciona o novo endereço à linha a alterar
     sprintf(art_new, "%d %d %d", atoi(argvMA[1]), endereco, tmp[2]);
     printf("%s\n", art_new);
 
@@ -129,13 +124,67 @@ void alteraNome(int fArt,int fStr, int argcMA, char* argvMA[], int codigo, int e
 
 
 }
+*/
+
+
+void altera_nome(char **argvMA) {
+    size_t offsetName = string_save(argvMA[1]);
+
+    if (offsetName < 0) {
+        printf("Linha 115. alteraNome()\nErro %ld: %s", offsetName, strerror(errno));
+    }
+
+    artigo_t artigo;
+    int offset = artigo_load(argvMA[1], &artigo);
+
+    if (offset < 0) {
+        printf("Linha 121. alteraNome()\nErro %d: %s", offset, strerror(errno));
+    }
+
+    artigo->offsetNome = offsetName;
+
+    artigo_save(artigo);
+
+    artigo_free(artigo);
+
+}
+
+/*
 void alteraPreco(int fArt, int fStr, int argcMA, char* argvMA[], size_t number_of_read_bytes, int codigo, int endereco){
     printf("p\n");
+}
+ */
+
+void altera_preco(char **argvMA, double novoPreco) {
+    artigo_t artigoParaAlterar;
+
+    long codigoArtigo = strtol(argvMA[1], NULL, 10); // char* -> lng
+
+    int errorVal = artigo_load(codigoArtigo, &artigoParaAlterar);
+
+    if (errorVal < 0) {
+        printf("Algo correu mal: altera_preco():168 = %d\n", errorVal);
+        return;
+    }
+
+    artigoParaAlterar->preco = novoPreco;
+
+    // Gravar o artigo depois de o alterar
+    errorVal = artigo_save(artigoParaAlterar);
+
+    if (errorVal < 0) {
+        printf("Algo correu mal: altera_preco():178 = %d\n", errorVal);
+        return;
+    }
+
+    artigo_free(artigoParaAlterar);
+
+
 }
 
 void manutencao_artigos() {
     size_t number_of_read_bytes;
-    
+
     char *buffer = (char*)malloc(bytes_to_read * sizeof(char));
     int argcMA;
     char **argvMA = (char**)malloc((bytes_to_read/2) * sizeof(char*));
@@ -160,24 +209,27 @@ void manutencao_artigos() {
         }
 
         while (argvMA[i] != NULL){
-            argvMA[++i] = strtok(NULL," ");  
+            argvMA[++i] = strtok(NULL, " ");
         }
-        
-        argvMA[i-1] = strtok(argvMA[i-1], "\n");
-        
-        argcMA = i;
-        
-        if(strcmp (argvMA[0],"i") == 0){
-            char *nomeArtigo = argvMA[1];
-            double precoArtigo;
-            sscanf(argvMA[2], "%lf", &precoArtigo); // Conversão da string para double
 
+        argvMA[i-1] = strtok(argvMA[i-1], "\n");
+
+        argcMA = i;
+
+        if(strcmp (argvMA[0],"i") == 0){
+            // Inserção de um novo artigo
+            char *nomeArtigo = argvMA[1];
+            double precoArtigo = strtod(argvMA[2], NULL);
             insere_artigo(nomeArtigo, precoArtigo);
 
         } else if(strcmp (argvMA[0],"n") == 0){
-            alteraNome(fArt, fStr, argcMA,argvMA, codigo, endereco, number_of_read_bytes);
+            // Alteração do nome de um artigo
+            altera_nome(argvMA);
+
         } else if (strcmp (argvMA[0],"p") == 0){
-            alteraPreco(fArt, fStr, argcMA, argvMA, number_of_read_bytes, codigo, endereco);
+            // Alteração do preço de um artigo
+            double novoPreco = strtod(argvMA[2], NULL);
+            altera_preco(argvMA, novoPreco);
         }
 
         codigo++;
