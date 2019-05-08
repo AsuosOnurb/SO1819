@@ -9,17 +9,14 @@
 
 #include "sv.h"
 #include "../common/fdb.h"
+#include "../common/artigo.h"
+#include "../common/venda.h"
 
-int regista_nova_venda(int quantidade, char *codigoArtigo, double precoArtigo) {
-    // Abrimos o ficheiro de vendas.
-    fdb_t fdbuf;
-    fdb_fopen(&fdbuf, "VENDAS.txt", O_CREAT | O_WRONLY, S_IWUSR);
+int registar_venda(artigo_t artigo, long quantidade) {
+    double montante = quantidade * artigo->preco;
 
-
-    // Conversão do montante para uma string
-    double montante = quantidade * precoArtigo;
-
-    fdb_printf(fdbuf, "%s %d %f", codigoArtigo, quantidade, montante);
+    // fdb_printf(fdbuf, "%s %d %f", codigoArtigo, quantidade, montante);
+    venda_t venda = venda_new(artigo->codigo, quantidade, montante);
 
 
     fdb_fclose(fdbuf);

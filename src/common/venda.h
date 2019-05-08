@@ -22,7 +22,7 @@ typedef struct venda {
     /** @brief Número de artigos vendidos. */
     long quantidade;
     /** @brief Montante total da venda. */
-    long montante;
+    double montante;
 } *venda_t;
 
 /** @brief Calcula o tamanho de uma entrada no ficheiro VENDAS de uma única entrada de stock, para ser fácil calcular o offset a partir de um código de um artigo. */
@@ -41,7 +41,7 @@ typedef struct venda {
  *
  * @return O artigo criado
  */
-venda_t venda_new(long codigo, long quantidade, long montante);
+venda_t venda_new(long codigo, long quantidade, double montante);
 
 /**
  * @brief Liberta a memória utilizada pela estrutura da venda referenciada.
