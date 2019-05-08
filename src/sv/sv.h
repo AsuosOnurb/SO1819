@@ -2,6 +2,7 @@
 #define SO1819_SV_H
 
 #include <stdio.h>
+#include "../common/artigo.h"
 
 
 
@@ -21,7 +22,7 @@ int regista_novo_stock(int novaQuantidade, char* codigoArtigo);
  * @param precoArtigo Preço individual do artigo.
  * @return Código de terminação.
  */
-int regista_nova_venda(int quantidade, char *codigoArtigo, double precoArtigo);
+int registar_venda(artigo_t artigo, long quantidade);
 
 
 /**
