@@ -322,7 +322,8 @@ int fdb_fopen(fdb_t *fdbuf, const char *path, int flags, mode_t mode) {
 
     // Check if open was successful
     if(fd == -1) {
-        perror("open() failed: ");
+        char buf[9999] = "open() failed";
+        perror(strcat(buf, path));
         return -4;
     }
     

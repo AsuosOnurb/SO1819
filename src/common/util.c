@@ -9,7 +9,7 @@ int file_open(fdb_t *fdbuffer, char *file, int write) {
     if(write) flags |= O_RDWR;
     else flags |= O_RDONLY;
 
-    if(fdb_fopen(fdbuffer, file, flags, S_IWUSR) != 0)
+    if(fdb_fopen(fdbuffer, file, flags, 0644) != 0)
         return -1;
 
     return 0;

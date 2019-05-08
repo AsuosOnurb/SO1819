@@ -1,7 +1,9 @@
 #include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <locale.h>
+#include <errno.h>
 
 #include "../common/fdb.h"
 #include "../common/commands.h"
@@ -9,7 +11,9 @@
 #include "../common/strings.h"
 #include "../common/util.h"
 
-#include "ma.c"
+#include "ma.h"
+
+#define bytes_to_read 64
 
 int main(int argc, const char *argv[]) {
     if (argc > 1){
@@ -23,16 +27,12 @@ int main(int argc, const char *argv[]) {
     char *buffer = (char*)malloc(bytes_to_read * sizeof(char));
     char **argvMA = (char**)malloc((bytes_to_read/2) * sizeof(char*));
     int i;
-    file_open(&g_pFdbStrings, "STRINGS", 1);
-    file_open(&g_pFdbArtigos, "ARTIGOS", 1);
 
+    file_open(&g_pFdbStrings, "STRINGS", 1);
     inicializar_ficheiro_artigos();
 
 
-    printf("i <nome> <preço> -> Insere novo artigo, mostra o código\n");
-    printf("n <código> <preço> -> altera nome do artigo\n");
-    printf("p <código> <preço> -> altera o preço do artigo\n");
-    printf("a -> mostra todos os códigos e os respetivos artigos\n");
+
 
     //verifica se cria o ficheiro SRTINGS
     while ((number_of_read_bytes = read(0, buffer, bytes_to_read)) > 0){
@@ -53,8 +53,8 @@ int main(int argc, const char *argv[]) {
         if(strcmp (argvMA[0],"i") == 0){
             long codigo;
             char *nomeArtigo = argvMA[1];
-            double precoArtigo;
-            sscanf(argvMA[2], "%lf", &precoArtigo); // Conversão da string para double
+            double precoArtigo = strtod(argvMA[2], NULL);
+
 
             codigo = insere_artigo(nomeArtigo, precoArtigo);
             printf("Código do artigo: %ld\n", codigo);
@@ -62,23 +62,17 @@ int main(int argc, const char *argv[]) {
         } else if(strcmp (argvMA[0],"n") == 0){
             int resultado;
             resultado = alteraNome(argvMA);
-            if (resultado == 0) {
-                printf("O nome do seu artigo foi alterado com sucesso\n");
-            } else {
+            if (resultado < 0) {
                 printf("O nome do seu artigo não foi alterado. Tente novamente!\nErro %d: erro no alteraNome()", resultado);
             }
         } else if (strcmp (argvMA[0],"p") == 0){
             int resultado;
             resultado = alteraPreco(argvMA);
-            if (resultado == 0) {
-                printf("O nome do seu artigo foi alterado com sucesso\n");
-            } else {
+            if (resultado < 0) {
                 printf("O nome do seu artigo não foi alterado. Tente novamente!\nErro %d: erro no alteraPreco()", resultado);
             }
         }
-        /*else if(strcmp(argvMA[0], "a") == 0){
-            todosCodigos();
-        }*/
+
 
 
     }
