@@ -6,7 +6,7 @@
 
 fdb_t g_pFdbVendas = NULL;
 
-venda_t venda_new(long codigo, long quantidade, long montante) {
+venda_t venda_new(long codigo, long quantidade, double montante) {
     // Criar a estrutura com a venda
     venda_t venda = (venda_t) malloc(sizeof(struct venda));
 
