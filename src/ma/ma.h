@@ -8,6 +8,8 @@
 #include "../common/strings.h"
 #include "../common/util.h"
 
+#define bytes_to_read 64
+
 /**
  * @brief Insere um novo artigo no ficheiro ARTIGOS.
  * Este ficheiro contém o código do artigo, o endereço do nome no ficheiro STRINGS e
