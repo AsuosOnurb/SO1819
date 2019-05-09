@@ -4,10 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #include "../common/strings.h"
 #include "../common/util.h"
-#include "cv.h"
 #include "../common/artigo.h"
+#include "../ma/ma.h"
+
+#include "cv.h"
+
 
 
 int main(int argc, const char *argv[]) {
@@ -16,7 +20,6 @@ int main(int argc, const char *argv[]) {
         printf("Este programa não utiliza argumentos na sua invocação.\n");
         return -1;
     }
-
 
     setlocale(LC_ALL, "Portuguese");
     size_t number_of_read_bytes;
@@ -28,13 +31,7 @@ int main(int argc, const char *argv[]) {
 
     inicializar_ficheiro_artigos();
 
-    /*
-    printf("i <nome> <preço> -> Insere novo artigo, mostra o código\n");
-    printf("n <código> <preço> -> altera nome do artigo\n");
-    printf("p <código> <preço> -> altera o preço do artigo\n");
-    printf("a -> mostra todos os códigos e os respetivos artigos\n");
-    */
-    //verifica se cria o ficheiro SRTINGS
+    int argCount = 0;
     while ((number_of_read_bytes = read(0, buffer, bytes_to_read)) > 0) {
         i = 0;
         argvMA[i] = strtok(buffer, " ");
@@ -44,37 +41,27 @@ int main(int argc, const char *argv[]) {
 
         while (argvMA[i] != NULL) {
             argvMA[++i] = strtok(NULL, " ");
+            argCount++;
         }
 
         argvMA[i - 1] = strtok(argvMA[i - 1], "\n");
 
-        if(strcmp (argvMA[0],"i") == 0){
-            long codigo;
-            char *nomeArtigo = argvMA[1];
-            double precoArtigo;
-            sscanf(argvMA[2], "%lf", &precoArtigo); // Conversão da string para double
-
-            codigo = insere_artigo(nomeArtigo, precoArtigo);
-            printf("Código do artigo: %ld\n", codigo);
-
-        } else if(strcmp (argvMA[0],"n") == 0){
-            int resultado;
-            resultado = alteraNome(argvMA);
-            if (resultado == 0) {
-                printf("O nome do seu artigo foi alterado com sucesso\n");
-            } else {
-                printf("O nome do seu artigo não foi alterado. Tente novamente!\nErro %d: erro no alteraNome()", resultado);
-            }
-        } else if (strcmp (argvMA[0],"p") == 0){
-            int resultado;
-            resultado = alteraPreco(argvMA);
-            if (resultado == 0) {
-                printf("O nome do seu artigo foi alterado com sucesso\n");
-            } else {
-                printf("O nome do seu artigo não foi alterado. Tente novamente!\nErro %d: erro no alteraPreco()", resultado);
-            }
+        long codigoArtigo = strtol(argvMA[0], NULL, 10);
+        if (argCount == 1) {
+            // Vamos apenas mostrar o stock e o preço do artigo
+            mostra_info_artigo(codigoArtigo);
+        } else if (argCount == 2) {   // Temos de atualizar o stock, e mostrar a nova quantidade
+            long acrescento = strtol(argvMA[1], NULL, 10);
+            atualiza_mostra_stock(codigoArtigo, acrescento);
+        } else {
+            // Comando não reconhecido
+            return -1;
         }
 
-        return 0;
+
     }
+    file_close(g_pFdbStrings);
+    file_close(g_pFdbArtigos);
+
+    return 0;
 }

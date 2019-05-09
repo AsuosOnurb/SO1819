@@ -32,8 +32,6 @@ int main(int argc, const char *argv[]) {
     inicializar_ficheiro_artigos();
 
 
-
-
     //verifica se cria o ficheiro SRTINGS
     while ((number_of_read_bytes = read(0, buffer, bytes_to_read)) > 0){
         i = 0;
