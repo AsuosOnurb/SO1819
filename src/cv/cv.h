@@ -9,7 +9,7 @@
  * Mostra no stdout o preço e o stock disponível do artigo com o código especificado.
  * @param codigoArtigo O código do artigo cuja informação pretendemos mostrar.
  */
-void mostra_info_artigo(long codigoArtigo);
+void mostra_info_stock(long codigoArtigo);
 
 /**
  * Atualiza o stock de um artigo, e faz print do stock atualizado.

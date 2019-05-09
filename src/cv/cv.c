@@ -13,7 +13,7 @@ void mostra_info_stock(long codigoArtigo) {
     }
 
     // Print do preço
-    printf("%f.\n", artigo->preco);
+    printf("%f\n", artigo->preco);
     artigo_free(artigo);
 
     stock_t stock;
@@ -24,7 +24,7 @@ void mostra_info_stock(long codigoArtigo) {
     }
 
     //Print da quantidade no stock
-    printf("%ld.\n", stock->quantidade);
+    printf("%ld\n", stock->quantidade);
     stock_free(stock);
 
 }
@@ -51,7 +51,7 @@ int atualiza_mostra_stock(long codigoArtigo, long acrescento) {
         return (-1);
     }
 
-    printf("%ld.\n", stock->quantidade);
+    printf("%ld\n", stock->quantidade);
 
     stock_free(stock);
 
