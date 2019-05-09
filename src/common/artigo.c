@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "fdb.h"
 #include "artigo.h"
@@ -6,7 +7,7 @@
 
 fdb_t g_pFdbArtigos = NULL;
 
-long g_iProximoCodigoUtilizavel = 0;
+long g_iProximoCodigoUtilizavel;
 
 int inicializar_ficheiro_artigos() {
     // Abrir um file descriptor associado ao ficheiro
@@ -22,16 +23,18 @@ int inicializar_ficheiro_artigos() {
     if(offset < 0)
         return -2;
 
+    // Verificar se o ficheiro acaba de ser inicializado
+    if(offset == 0) {
+        // O ficheiro acabou de ser inicializado, logo g_iProximoCodigoUtilizavel = 0
+        g_iProximoCodigoUtilizavel = 0;
+        return 0;
+    }
+
     // Calcular o offset da última entrada
     offset -= TAMANHO_ENTRADA_ARTIGO;
 
-    // Fazer lseek para essa entrada
-    if(fdb_lseek(g_pFdbArtigos, offset, SEEK_SET) != offset)
-        return -3;
-
-    // Ler o código da última entrada no disco
-    if(fdb_read(g_pFdbArtigos, &g_iProximoCodigoUtilizavel, sizeof(g_iProximoCodigoUtilizavel)) <= 0)
-        return -4;
+    // Calcular o código a partir do offset da última entrada
+    g_iProximoCodigoUtilizavel = (long) ((offset - INICIO_ENTRADAS_ARTIGO) / TAMANHO_ENTRADA_ARTIGO);
 
     // O próximo código utilizável é o código da última entrada no disco somado de uma unidade
     g_iProximoCodigoUtilizavel++;
