@@ -38,14 +38,14 @@ int stock_load(long codigoArtigo, stock_t *stockRef) {
             return -3;
 
     // Criar uma entrada em memória para este stock, que automaticamente calcula o offset onde esta se deve encontrar
-    stock_t stock = stock_new(codigoArtigo, -1);
+    stock_t stock = stock_new(codigoArtigo, 0);
 
     // Mover o apontador do ficheiro para a posição correta
     if(fdb_lseek(g_pFdbStocks, stock->offset, SEEK_SET) != stock->offset)
         return -4;
 
     // Ler do ficheiro a quantidade deste artigo disponível em stock
-    if(fdb_read(g_pFdbStocks, &stock->quantidade, sizeof(stock->quantidade)) <= 0)
+    if (fdb_read(g_pFdbStocks, &stock->quantidade, sizeof(stock->quantidade)) < 0)
         return -5;
 
     // Sucesso!
