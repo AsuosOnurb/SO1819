@@ -26,7 +26,7 @@ long insere_artigo(char *nomeArtigo, double precoArtigo) {
     // Criar string nova
     ssize_t offsetNome = string_save(nomeArtigo);
     if (offsetNome < 0) {
-        printf("Algo correu mal: insere_artigo():59 = %ld\n", offsetNome);
+        printf("Algo correu mal: insere_artigo():29 = %ld\n", offsetNome);
 
     }
 
@@ -36,7 +36,7 @@ long insere_artigo(char *nomeArtigo, double precoArtigo) {
     // Guardar o artigo
     int errorCode = artigo_save(novoArtigo);
     if (errorCode < 0) {
-        printf("Algo correu mal: insere_artigo():68 = %d\n", errorCode);
+        printf("Algo correu mal: insere_artigo():39 = %d\n", errorCode);
     }
 
     return novoArtigo->codigo;
