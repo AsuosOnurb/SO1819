@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include "cv.h"
-
 #include "../common/artigo.h"
 #include "../common/stock.h"
+#include "cv.h"
+
 
 void mostra_info_stock(long codigoArtigo) {
     artigo_t artigo;
