@@ -47,12 +47,24 @@ int main(int argc, const char *argv[]) {
     fdb_t fdbFifo;
     fdb_create(STDIN_FILENO, &fdbFifo); // Unlikely to fail
 
-    char instruction;
+    // Este servidor funciona com instruções:
+    // Lê a partir do fifo um código de instrução (uma char)
+    // Interpreta a instrução de acordo com as instruções que é capaz de aceitar
+    // Depois, no código responsável por processar cada instrução, lê a partir do pipe os argumentos respetivos dessa instrução,
+    // que se encontram descritos abaixo
+    instruction_t instruction;
     while(fdb_read(fdbFifo, &instruction, 1) == 1) {
         char *result = NULL;
         ssize_t dataSize = 0;
 
         if(instruction == SV_INSTRUCTION_MOSTRAR_STOCK_E_PRECO) {
+            // Esta instrução lê do pipe os seguintes argumentos:
+            // long => codigo
+            // pid_t => pid do processo que requereu os dados
+            // Esta instrução escreve no pipe de resposta os seguintes argumentos:
+            // long => quantidade
+            // double => preço
+
             long codigo;
             if(fdb_read(fdbFifo, &codigo, sizeof(codigo)) < 0) {
                 fdb_printf(fdbStderr, "[MOSTRAR_STOCK_E_PRECO] Erro ao ler o código do artigo do FIFO! Terminando...\n");
@@ -74,6 +86,13 @@ int main(int argc, const char *argv[]) {
 
             result = data;
         } else if(instruction == SV_INSTRUCTION_ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK) {
+            // Esta instrução lê do pipe os seguintes argumentos:
+            // long => codigo
+            // long => quantidade
+            // pid_t => pid do processo que requereu os dados
+            // Esta instrução escreve no pipe de resposta os seguintes argumentos:
+            // long => novoStock
+
             long codigo;
             if(fdb_read(fdbFifo, &codigo, sizeof(codigo)) < 0) {
                 fdb_printf(fdbStderr, "[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] Erro ao ler o código do artigo do FIFO! Terminando...\n");
