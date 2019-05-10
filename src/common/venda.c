@@ -37,7 +37,7 @@ int venda_load(ssize_t offset, venda_t *vendaRef) {
 
     // Verificar se o ficheiro de vendas está aberto
     if(g_pFdbVendas == NULL)
-        if(file_open(&g_pFdbVendas, NOME_FICHEIRO_VENDAS, 1) != 0)
+        if(file_open(&g_pFdbVendas, NOME_FICHEIRO_VENDAS, true, true) != 0)
             return -3;
 
     // Fazer seek para a posição correta
@@ -83,7 +83,7 @@ int venda_save(venda_t venda) {
     // Verificar se o ficheiro de vendas está aberto
     if(g_pFdbVendas == NULL)
         // Tentar abrir o ficheiro
-        if(file_open(&g_pFdbVendas, NOME_FICHEIRO_VENDAS, 1) != 0)
+        if(file_open(&g_pFdbVendas, NOME_FICHEIRO_VENDAS, true, true) != 0)
             return -2;
 
     // Fazer lseek para a posição correta, que depende do offset

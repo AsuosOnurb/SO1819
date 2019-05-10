@@ -28,7 +28,7 @@ int string_load(size_t offset, string_t *strRef) {
 
     // Verificar se o ficheiro está aberto
     if(g_pFdbStrings == NULL)
-        if(file_open(&g_pFdbStrings, NOME_FICHEIRO_STRINGS, 1) != 0)
+        if(file_open(&g_pFdbStrings, NOME_FICHEIRO_STRINGS, true, true) != 0)
             return -2;
 
     // Carregar efetivamente a string
@@ -64,7 +64,7 @@ ssize_t string_save(const char *string) {
 
     // Verificar se o ficheiro está aberto
     if(g_pFdbStrings == NULL)
-        if(file_open(&g_pFdbStrings, NOME_FICHEIRO_STRINGS, 1) != 0)
+        if(file_open(&g_pFdbStrings, NOME_FICHEIRO_STRINGS, true, true) != 0)
             return -2;
 
     // Guardar efetivamente a string

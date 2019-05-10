@@ -3,11 +3,15 @@
 #include "util.h"
 #include "strings.h"
 
-int file_open(fdb_t *fdbuffer, char *file, int write) {
+int file_open(fdb_t *fdbuffer, char *file, bool read, bool write) {
     int flags = O_CREAT;
 
-    if(write) flags |= O_RDWR;
-    else flags |= O_RDONLY;
+    if(read == write == true)
+        flags |= O_RDWR;
+    else if(read)
+        flags |= O_RDONLY;
+    else if(write)
+        flags |= O_WRONLY;
 
     if(fdb_fopen(fdbuffer, file, flags, 0644) != 0)
         return -1;

@@ -28,7 +28,7 @@ int main(int argc, const char *argv[]) {
     char **argvMA = (char**)malloc((bytes_to_read/2) * sizeof(char*));
     int i;
 
-    file_open(&g_pFdbStrings, "STRINGS", 1);
+    file_open(&g_pFdbStrings, "STRINGS", true, true);
     inicializar_ficheiro_artigos();
 
 

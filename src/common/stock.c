@@ -34,7 +34,7 @@ int stock_load(long codigoArtigo, stock_t *stockRef) {
 
     // Verificar se o ficheiro dos stocks está aberto
     if(g_pFdbStocks == NULL)
-        if(file_open(&g_pFdbStocks, NOME_FICHEIRO_STOCKS, 1) != 0)
+        if(file_open(&g_pFdbStocks, NOME_FICHEIRO_STOCKS, true, true) != 0)
             return -3;
 
     // Criar uma entrada em memória para este stock, que automaticamente calcula o offset onde esta se deve encontrar
@@ -60,7 +60,7 @@ int stock_save(stock_t stock) {
 
     // Verificar se o ficheiro dos stocks está aberto
     if(g_pFdbStocks == NULL)
-        if(file_open(&g_pFdbStocks, NOME_FICHEIRO_STOCKS, 1) != 0)
+        if(file_open(&g_pFdbStocks, NOME_FICHEIRO_STOCKS, true, true) != 0)
             return -2;
 
     // Mover o apontador do ficheiro para a posição correta

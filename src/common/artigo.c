@@ -11,7 +11,7 @@ long g_iProximoCodigoUtilizavel;
 
 int inicializar_ficheiro_artigos() {
     // Abrir um file descriptor associado ao ficheiro
-    if(file_open(&g_pFdbArtigos, NOME_FICHEIRO_ARTIGOS, 1) != 0)
+    if(file_open(&g_pFdbArtigos, NOME_FICHEIRO_ARTIGOS, true, true) != 0)
         return -1;
 
     // Carregar o código do próximo código utilizável:

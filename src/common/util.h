@@ -8,10 +8,11 @@
  *
  * @param fdbuffer O buffer associado ao ficheiro
  * @param file O ficheiro para abrir
- * @param write 1 se quisermos abrir o ficheiro para escrita, assim como leitura
+ * @param read true se quisermos abrir o ficheiro para leitura
+ * @param write true se quisermos abrir o ficheiro para escrita
  * @return 0 se tudo correu bem, <0 em caso de erro
  */
-int file_open(fdb_t *fdbuffer, char *file, int write);
+int file_open(fdb_t *fdbuffer, char *file, bool read, bool write);
 
 /**
  * @brief Fecha o ficheiro, buffer e file descriptor indicados.

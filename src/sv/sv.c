@@ -1,36 +1,61 @@
-#include <unistd.h>
-#include <fcntl.h>
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <zconf.h>
-
-#include <sys/stat.h>
+#include "../common/artigo.h"
+#include "../common/stock.h"
 
 #include "sv.h"
-#include "../common/fdb.h"
-#include "../common/artigo.h"
-#include "../common/venda.h"
 
-int registar_venda(artigo_t artigo, long quantidade) {
-    double montante = quantidade * artigo->preco;
+int mostra_info_artigo(long codigoArtigo, long *quantidade, double *preco) {
+    // Carregar o artigo parar consultar o seu preço
+    artigo_t artigo;
+    if(artigo_load(codigoArtigo, &artigo) != 0)
+        return -1;
 
-    // fdb_printf(fdbuf, "%s %d %f", codigoArtigo, quantidade, montante);
-    venda_t venda = venda_new(artigo->codigo, quantidade, montante);
+    // Print do preço
+    *preco = artigo->preco;
 
+    // Libertar a memória
+    artigo_free(artigo);
 
-    fdb_fclose(fdbuf);
+    // Carregar o stock do artigo
+    stock_t stock;
+    if(stock_load(codigoArtigo, &stock) < 0)
+        return -2;
 
-    // Retornar que não houve erro
+    // Print da quantidade no stock
+    *quantidade = stock->quantidade;
+
+    // Libertar a memória
+    stock_free(stock);
+
+    // Sucesso
     return 0;
 }
 
+int atualiza_mostra_stock(long codigoArtigo, long acrescento, long *novoStock) {
+    // Carregar o stock
+    stock_t stock;
+    if(stock_load(codigoArtigo, &stock) != 0)
+        return -1;
 
+    // Modificar o stock. Obviamente não podemos ter stock negativo.
+    if(stock->quantidade + acrescento < 0) {
+        // Zeramos o stock.
+        stock->quantidade = 0;
+        return -2;
+    } else
+        stock->quantidade += acrescento;
 
+    // Guardar o stock
+    if(stock_save(stock) != 0) {
+        return -3;
+    }
 
+    // Devolver o resultado
+    *novoStock = stock->quantidade;
 
+    // Libertar a memória
+    stock_free(stock);
 
-
-
-
-
+    // Sucesso
+    return 0;
+}
