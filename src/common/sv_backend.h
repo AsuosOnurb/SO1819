@@ -20,7 +20,7 @@ typedef char instruction_t;
  *
  * @return 0 se tudo correu bem; <0 se algo correu mal
  */
-int send_instruction(int instruction, void *params);
+int sv_send_instruction(int instruction, void *params);
 
 /**
  * @brief Obtém o stock e o preço de um artigo a partir do servidor.
@@ -31,7 +31,7 @@ int send_instruction(int instruction, void *params);
  *
  * @return 0 se correr tudo bem; <0 em caso de erro
  */
-int mostra_info_artigo(long codigoArtigo, long *quantidade, double *preco);
+int sv_get_info_artigo(long codigoArtigo, long *quantidade, double *preco);
 
 /**
  * @brief Pede ao servidor para atualizar o stock de um artigo, retornando o novo stock.
@@ -42,6 +42,6 @@ int mostra_info_artigo(long codigoArtigo, long *quantidade, double *preco);
  *
  * @return 0 se tudo correr bem; <0 em caso de erro
  */
-int atualiza_mostra_stock(long codigoArtigo, long acrescento, long *novoStock);
+int sv_update_mostra_stock(long codigoArtigo, long acrescento, long *novoStock);
 
 #endif //SO1819_SV_BACKEND_H
