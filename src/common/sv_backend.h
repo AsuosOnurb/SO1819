@@ -10,11 +10,6 @@
 /** @brief Define que a instrução de correr o agregador tem o ID 3. */
 #define SV_INSTRUCTION_EXECUTAR_AG (3)
 
-int send_instruction(int instruction, void **params) {
-
-
-    // Sucesso!
-    return 0;
-}
+int send_instruction(int instruction, void **params);
 
 #endif //SO1819_SV_BACKEND_H
