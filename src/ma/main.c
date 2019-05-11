@@ -48,7 +48,7 @@ int main() {
 
 
             codigo = insere_artigo(nomeArtigo, precoArtigo);
-            printf("Código do artigo: %ld\n", codigo);
+            printf("%ld\n", codigo);
 
         } else if(strcmp (argvMA[0],"n") == 0){
             int resultado;
