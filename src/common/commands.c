@@ -37,6 +37,8 @@ int execute_command_with(char *command, int stdinfd, int stdoutfd, int *returnCo
         // Exit if we failed to execute the command
         _exit(-1);
     } else {
+        // In the parent
+
         // Wait for the child to terminate, if required
         int status = 0;
 

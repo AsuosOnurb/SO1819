@@ -177,7 +177,6 @@ ssize_t fdb_read(fdb_t fdbuf, void *pVoid, size_t size) {
     // Actually read the data from the file descriptor
     char *buf = (char *) pVoid; // sizeof(char) == 1
     size_t totalCapacity = size;
-    size_t bufStart = 0;
 
     while(size > 0) {
         // Check if fdbuf->buffer requires refilling
@@ -205,10 +204,10 @@ ssize_t fdb_read(fdb_t fdbuf, void *pVoid, size_t size) {
 
         size -= bytesAvailable;
 
-        memcpy(buf + bufStart, fdbuf->buffer + fdbuf->start, bytesAvailable);
+        memcpy(buf, fdbuf->buffer + fdbuf->start, bytesAvailable);
         fdbuf->start += bytesAvailable;
 
-        bufStart += bytesAvailable;
+        buf += bytesAvailable;
     }
 
     // Returns the number of bytes effectively read from the buffer

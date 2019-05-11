@@ -160,7 +160,7 @@ setup:
 #### Cleans up all binaries, objects, documentation, created zip files, and marks the project as not setup
 clean:
 #	Apaga os diretórios, conteúdo e ficheiros chamados: setup, bin, doc, obj, install, $(zipname)
-	rm -rf setup bin doc obj $(zipname)
+	rm -rf setup bin doc obj $(zipname) ARTIGOS STOCKS STRINGS VENDAS fifo_*
 
 
 ### Runnable targets

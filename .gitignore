@@ -5,3 +5,8 @@ bin/
 obj/
 doc/
 setup
+fifo_*
+ARTIGOS
+STOCKS
+STRINGS
+VENDAS

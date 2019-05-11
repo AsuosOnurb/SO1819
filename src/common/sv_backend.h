@@ -5,7 +5,7 @@
 #include "fdb.h"
 
 /** @brief Nome da FIFO do servidor. */
-#define SV_FIFO_NAME "sv_fifo"
+#define SV_FIFO_NAME "fifo_sv"
 
 /** @brief Define que a instrução de mostrar o stock e o preço tem o ID 1. */
 #define SV_INSTRUCTION_MOSTRAR_STOCK_E_PRECO ((instruction_t) 1)
@@ -21,6 +21,14 @@ typedef char instruction_t;
 extern fdb_t g_pFdbServerFifo;
 
 /**
+ * @brief Macro de utilizadade para automaticamente e consistentemente calcular o formato e nome do FIFO de resposta de um PID.
+ *
+ * @param pid Pid do processo que vai receber a resposta
+ * @param strPidResposta Onde guardar a string formatada com o nome do FIFO de resposta
+ */
+#define calcularFifoResposta(p, s) sprintf((s), "pid_%d", (p))
+
+/**
  * @brief Envia uma instrução ao servidor de vendas.
  *
  * @param instructionCode O ID da instrução a enviar
@@ -30,7 +38,7 @@ extern fdb_t g_pFdbServerFifo;
  *
  * @return 0 se tudo correu bem; <0 se algo correu mal
  */
-int sv_send_instruction(instruction_t instructionCode, const void *params, size_t dataSize, pid_t currentPid);
+int sv_send_instruction(instruction_t instructionCode, const char *params, size_t dataSize, pid_t currentPid);
 
 /**
  * @brief Obtém o stock e o preço de um artigo a partir do servidor.

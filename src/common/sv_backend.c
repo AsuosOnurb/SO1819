@@ -9,27 +9,29 @@
 
 fdb_t g_pFdbServerFifo = NULL;
 
-int sv_send_instruction(instruction_t instructionCode, const void *params, size_t dataSize, pid_t currentPid) {
+
+
+int sv_send_instruction(instruction_t instructionCode, const char *params, size_t dataSize, pid_t currentPid) {
     // First, make sure we have a communication pipe with the server
-    fdb_t pFdbServerFifo;
-    // Attempt to open the pipe
-    if(file_open(&pFdbServerFifo, SV_FIFO_NAME, false, true) != 0)
-        return -1; // error!
+    if(g_pFdbServerFifo == NULL)
+        // Attempt to open the pipe
+        if(file_open(&g_pFdbServerFifo, SV_FIFO_NAME, false, true) != 0)
+            return -1; // error!
 
 
     // POSIX only guarantees that a single write less than PIPE_BUF bytes to a fifo won't be interlaced with other writes from other processes
-    // So, let's ensure we do a single write call by creating a buffer and writting to it
-    char *buf = (char *) malloc(sizeof(instructionCode) + dataSize + sizeof(currentPid));
+    // So, let's ensure we do a single write call by creating a buffer and writing to it
+    char *buf = (char *) malloc(sizeof(currentPid) + sizeof(instructionCode) + dataSize);
 
     // Copy to the buffer the instruction code
     memcpy(buf, &instructionCode, sizeof(instructionCode));
-    // Copy to the buffer the parameters of the instruction
-    memcpy(buf + sizeof(instructionCode), params, dataSize);
     // Copy to the buffer the PID of the process so that the server knows who asked and knows where to direct its answer
-    memcpy(buf + sizeof(instructionCode) + dataSize, &currentPid, sizeof(currentPid));
+    memcpy(buf + sizeof(instructionCode), &currentPid, sizeof(currentPid));
+    // Copy to the buffer the parameters of the instruction
+    memcpy(buf + sizeof(instructionCode) + sizeof(currentPid), params, dataSize);
 
     // Now, attempt to actually write everything into the buffer
-    if(fdb_write(pFdbServerFifo, buf, sizeof(instructionCode) + dataSize + sizeof(currentPid)) != 0) {
+    if(fdb_write(g_pFdbServerFifo, buf, sizeof(instructionCode) + sizeof(currentPid) + dataSize) != 0) {
         free(buf);
         return -3;
     }
@@ -56,7 +58,7 @@ int sv_get_info_artigo(long codigoArtigo, long *quantidade, double *preco) {
 
     // Obter o PID do processo como string
     char pidStr[128];
-    sprintf(pidStr, "%d", pid);
+    calcularFifoResposta(pid, pidStr);
 
     // Abrir um file descriptor para a fifo de resposta, que automaticamente cria essa mesma fifo
     fdb_t fdbResponseFifo;
@@ -68,18 +70,28 @@ int sv_get_info_artigo(long codigoArtigo, long *quantidade, double *preco) {
         return -2;
 
     // Read the response as soon as it becomes available
+
+    // Verificar, antes de tudo, se a resposta indica que foi bem sucedida
+    bool sucesso;
+    if(fdb_read(fdbResponseFifo, &sucesso, sizeof(sucesso)) <= 0)
+        return -3;
+
+    // Verificar se a execução da instrução foi bem sucedida
+    if(!sucesso)
+        return -4;
+
     // Esta instrução lê do pipe de resposta os seguintes argumentos:
     // long => quantidade
     // double => preço
     if(fdb_read(fdbResponseFifo, quantidade, sizeof(*quantidade)) <= 0)
-        return -3;
+        return -5;
 
     if(fdb_read(fdbResponseFifo, preco, sizeof(*preco)) <= 0)
-        return -4;
+        return -6;
 
     // Fechar o file descriptor da fifo de resposta
     if(fdb_unlink(fdbResponseFifo) != 0)
-        return -4;
+        return -7;
 
     // Sucesso!
     return 0;
@@ -93,13 +105,14 @@ int sv_update_mostra_stock(long codigoArtigo, long acrescento, long *novoStock) 
 
     char params[sizeof(codigoArtigo) + sizeof(acrescento)];
     memcpy(params, &codigoArtigo, sizeof(codigoArtigo));
+    memcpy(params + sizeof(codigoArtigo), &acrescento, sizeof(acrescento));
 
     // O PID atual vai servir para identificar a fifo a partir da qual o servidor vai responder ao cliente
     pid_t pid = getpid();
 
     // Obter o PID do processo como string
     char pidStr[128];
-    sprintf(pidStr, "%d", pid);
+    calcularFifoResposta(pid, pidStr);
 
     // Abrir um file descriptor para a fifo de resposta, que automaticamente cria essa mesma fifo
     fdb_t fdbResponseFifo;
@@ -111,14 +124,22 @@ int sv_update_mostra_stock(long codigoArtigo, long acrescento, long *novoStock) 
         return -2;
 
     // Read the response as soon as it becomes available
+    bool sucesso;
+    if(fdb_read(fdbResponseFifo, &sucesso, sizeof(sucesso)) <= 0)
+        return -3;
+
+    // Verificar se a execução da instrução foi bem sucedida
+    if(!sucesso)
+        return -4;
+
     // Esta instrução lê do pipe de resposta os seguintes argumentos:
     // long => novoStock
     if(fdb_read(fdbResponseFifo, novoStock, sizeof(*novoStock)) <= 0)
-        return -3;
+        return -5;
 
     // Fechar o file descriptor da fifo de resposta
     if(fdb_unlink(fdbResponseFifo) != 0)
-        return -4;
+        return -6;
 
     // Sucesso!
     return 0;
