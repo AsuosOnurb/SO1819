@@ -41,13 +41,12 @@ int atualiza_mostra_stock(long codigoArtigo, long acrescento, long *novoStock) {
     if(stock->quantidade + acrescento < 0) {
         // Zeramos o stock.
         stock->quantidade = 0;
-        return -2;
     } else
         stock->quantidade += acrescento;
 
     // Guardar o stock
     if(stock_save(stock) != 0) {
-        return -3;
+        return -2;
     }
 
     // Devolver o resultado
