@@ -15,21 +15,22 @@ int fdb_create(fdb_t *fdbufLoc, int fd) {
     if(fdbufLoc == NULL)
         return -1;
 
-    if(fd < 0)
-        return -2;
-
     // Do a system call to get the block size
     struct stat sb;
-    if(fstat(fd, &sb) != 0)
-        return -3;
+    if(fd >= 0 && fstat(fd, &sb) != 0)
+        return -2;
     
-    size_t blockSize = (size_t) sb.st_blksize;
+    size_t blockSize;
+    if(fd >= 0)
+        blockSize = (size_t) sb.st_blksize;
+    else
+        blockSize = 1; // default until we can actually read this information
 
     // Allocate memory for the buffer struct
     fdb_t fdbuf = (fdb_t) malloc(sizeof(struct fdb));
 
     if(fdbuf == NULL)
-        return -4;
+        return -3;
 
     // Initialize struct values
     fdbuf->fd = fd;
@@ -43,7 +44,8 @@ int fdb_create(fdb_t *fdbufLoc, int fd) {
 
     // Check if allocation was successful
     if(fdbuf->buffer == NULL) {
-        return -5;
+        free(fdbuf);
+        return -4;
     }
 
     // Success
@@ -91,9 +93,18 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
 
     // Before anything else, we must check if we're dealing with a FIFO
     // If we are and the FIFO is closed, open it
-    if(fdbuf->is_fifo && fdbuf->fd == -1)
+    if(fdbuf->is_fifo && fdbuf->fd == -1) {
         if((fdbuf->fd = open(fdbuf->path, fdbuf->flags, fdbuf->mode)) < 0)
             return -3;
+
+        // Do a system call to get the block size
+        struct stat sb;
+        if(fstat(fdbuf->fd, &sb) != 0)
+            return -2;
+
+        fdbuf->size = (size_t) sb.st_blksize;
+        fdbuf->buffer = (char *) realloc(fdbuf->buffer, sizeof(char) * fdbuf->size);
+    }
 
     // Actually perform the system call
     ssize_t bytesRead = read(fdbuf->fd, fdbuf->buffer, fdbuf->size);
