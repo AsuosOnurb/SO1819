@@ -1,6 +1,6 @@
 #include "ag.h"
 
-int main(int argc, const char *argv[]) {
+int main() {
     // ADD STUFF HERE
     return 0;
 }

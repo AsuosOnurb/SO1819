@@ -6,7 +6,7 @@
 int file_open(fdb_t *fdbuffer, char *file, bool read, bool write) {
     int flags = O_CREAT;
 
-    if(read == write == true)
+    if(read == write && read == true)
         flags |= O_RDWR;
     else if(read)
         flags |= O_RDONLY;

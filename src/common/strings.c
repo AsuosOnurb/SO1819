@@ -45,7 +45,7 @@ string_t string_new(ssize_t offset, size_t length, const char *str) {
     return strRef;
 }
 
-int string_load(size_t offset, string_t *strRef) {
+int string_load(ssize_t offset, string_t *strRef) {
     // Assumimos um offset válido!
     if(strRef == NULL)
         return -1;
@@ -60,7 +60,7 @@ int string_load(size_t offset, string_t *strRef) {
         return -3;
 
     // Ler o tamanho da string a partir do ficheiro
-    size_t length = 0;
+    ssize_t length = 0;
     if(fdb_read(g_pFdbStrings, &length, sizeof(size_t)) <= 0)
         return -4;
 

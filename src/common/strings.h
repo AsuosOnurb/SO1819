@@ -55,7 +55,7 @@ string_t string_new(ssize_t offset, size_t length, const char *str);
  *
  * @return 0 em caso de sucesso, <0 em caso de erro
  */
-int string_load(size_t offset, string_t *strRef);
+int string_load(ssize_t offset, string_t *strRef);
 
 /**
  * @brief Escreve uma string para o ficheiro de STRINGS.

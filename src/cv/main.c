@@ -14,13 +14,7 @@
 #include "cv.h"
 
 
-int main(int argc, const char *argv[]) {
-
-    if (argc > 1) {
-        printf("Este programa não utiliza argumentos na sua invocação.\n");
-        return -1;
-    }
-
+int main() {
     setlocale(LC_ALL, "Portuguese");
     char *buffer = (char *) malloc(bytes_to_read * sizeof(char));
     char **argArray = (char **) malloc((bytes_to_read / 2) * sizeof(char *));

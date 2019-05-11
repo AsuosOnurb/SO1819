@@ -16,13 +16,7 @@
 
 #include "sv.h"
 
-int main(int argc, const char *argv[]) {
-    // Verificar os parâmetros do programa
-    if (argc > 1) {
-        printf("Este programa não utiliza argumentos na sua invocação.\n");
-        return -1;
-    }
-
+int main() {
     // Inicializar file descriptor buffers para o stdin e stdout
     fdb_t fdbStdin, fdbStdout, fdbStderr;
     fdb_create(&fdbStdin, STDIN_FILENO);
