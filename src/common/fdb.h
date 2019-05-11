@@ -26,6 +26,14 @@ typedef struct fdb {
     char *buffer;
     /** @brief Verdadeiro se atingimos EOF. */
     bool eof;
+    /** @brief Nome do ficheiro associado, se existir e foi possível obter. */
+    const char *path;
+    /** @brief Flags do ficheiro associado, se existir. */
+    int flags;
+    /** @brief Modo de permissões para abrir o ficheiro. */
+    mode_t mode;
+    /** @brief Verdadeiro se este fdbuffer está associado a uma FIFO. */
+    bool is_fifo;
 } *fdb_t;
 
 /**
@@ -36,7 +44,7 @@ typedef struct fdb {
  * 
  * @return 0 se correu tudo bem, <0 em caso de erro
  */
-int fdb_create(int fd, fdb_t *fdbuf);
+int fdb_create(fdb_t *fdbuf, int fd);
 
 /**
  * @brief Destrói um fdbuffer.
@@ -155,5 +163,26 @@ int fdb_fclose(fdb_t fdbuf);
  * @return O novo offset para leitura/escrita em caso de sucesso, <0 em caso de erro
  */
 int fdb_lseek(fdb_t fdbuf, off_t offset, int seekFlags);
+
+/**
+ * @brief Cria um FIFO, abre um file descriptor e cria um fdb_t associado a essa FIFO, com as flags especificadas.
+ *
+ * @param fdbuf Onde guardar o fdbuffer criado
+ * @param path O caminho da FIFO a criar
+ * @param flags Bitwised-flags sobre como abrir o ficheiro (que irão ser passadas à system call read(2))
+ * @param mode Modo de permissões para o ficheiro a abrir
+ *
+ * @return 0 em caso de sucesso, <0 em caso de erro
+ */
+int fdb_mkfifo(fdb_t *fdbuf, const char *path, int flags, mode_t mode);
+
+/**
+ * @brief Fecha um FIFO, e o descritor de ficheiros associado, e destrói o fdb_t associado.
+ *
+ * @param fdbuf O FIFO a fechar
+ *
+ * @return 0 em caso de sucesso, <0 em caso de erro
+ */
+int fdb_unlink(fdb_t fdbuf);
 
 #endif // FDB_H

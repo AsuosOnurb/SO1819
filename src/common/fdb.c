@@ -10,14 +10,15 @@
 
 #include "fdb.h"
 
-int fdb_create(int fd, fdb_t *fdbufLoc) {
+int fdb_create(fdb_t *fdbufLoc, int fd) {
     // Check parameters
-    if(fd < 0)
+    if(fdbufLoc == NULL)
         return -1;
 
-    if(fdbufLoc == NULL)
+    if(fd < 0)
         return -2;
 
+    // Do a system call to get the block size
     struct stat sb;
     if(fstat(fd, &sb) != 0)
         return -3;
@@ -27,6 +28,9 @@ int fdb_create(int fd, fdb_t *fdbufLoc) {
     // Allocate memory for the buffer struct
     fdb_t fdbuf = (fdb_t) malloc(sizeof(struct fdb));
 
+    if(fdbuf == NULL)
+        return -4;
+
     // Initialize struct values
     fdbuf->fd = fd;
     fdbuf->size = blockSize;
@@ -34,10 +38,12 @@ int fdb_create(int fd, fdb_t *fdbufLoc) {
     fdbuf->occupation = 0;
     fdbuf->buffer = (char *) malloc(sizeof(char) * blockSize); // Attempt to allocate the actual buffer memory
     fdbuf->eof = false;
+    fdbuf->path = NULL;
+    fdbuf->is_fifo = false;
 
     // Check if allocation was successful
     if(fdbuf->buffer == NULL) {
-        return -4;
+        return -5;
     }
 
     // Success
@@ -50,6 +56,11 @@ int fdb_destroy(fdb_t fdbuf) {
     if(fdbuf == NULL)
         return -1;
 
+    // We don't destroy fifos ever
+    // This flag will be unset when necessary
+    if(fdbuf->is_fifo)
+        return 0;
+
     // Release buffer and struct memory
     free(fdbuf->buffer);
     free(fdbuf);
@@ -59,7 +70,8 @@ int fdb_destroy(fdb_t fdbuf) {
 }
 
 /**
- * @brief Attempts to fill the fdbuf->buffer with bytes from the file descriptor.
+ * @brief Attempts to fill the fdbuf->buffer with bytes from the file descriptor.<br>
+ * Handles FIFO special files.
  * 
  * @param fdbuf The buffer to fill
  * 
@@ -72,15 +84,16 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
     
     // Check preconditions
     if(fdbuf->start < fdbuf->occupation)
-        return -2; // Data from last read(2) isn't exausted yet
+        return -2; // Data from last read(2) isn't exhausted yet
     
     fdbuf->start = 0;
     fdbuf->occupation = 0;
 
-    // First do a system call to get the readable bytes on the file
-    struct stat sb;
-    if(fstat(fdbuf->fd, &sb) != 0)
-        return -3;
+    // Before anything else, we must check if we're dealing with a FIFO
+    // If we are and the FIFO is closed, open it
+    if(fdbuf->is_fifo && fdbuf->fd == -1)
+        if((fdbuf->fd = open(fdbuf->path, fdbuf->flags, fdbuf->mode)) < 0)
+            return -3;
 
     // Actually perform the system call
     ssize_t bytesRead = read(fdbuf->fd, fdbuf->buffer, fdbuf->size);
@@ -93,6 +106,16 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
 
     // Check if EOF reached, and set eof flag on struct if so
     if(bytesRead == 0) {
+        if(fdbuf->is_fifo) {
+            // In FIFOs, reads() don't block if there's no other end of the pipe open for writing
+            // In these cases, only open() blocks until there's another end of the pipe open for writing
+            // Because of this, we must close the file descriptor and reopen it
+            close(fdbuf->fd);
+            fdbuf->fd = -1;
+
+            return fdbuffer_fillbuf(fdbuf);
+        }
+
         //bytesRead = read(fdbuf->fd, fdbuf->buffer, fdbuf->size);
 
         //if(bytesRead == 0)
@@ -102,6 +125,7 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
     // Set occupation 
     fdbuf->occupation = bytesRead;
 
+    // Success: return the number of bytes effectively read from the buffer
     return bytesRead;
 }
 
@@ -131,16 +155,18 @@ char fdb_readc(fdb_t fdbuf) {
     return fdbuffer_readc_unchecked(fdbuf);
 }
 
-ssize_t fdb_read(fdb_t fdbuf, void *buf, size_t size) {
+ssize_t fdb_read(fdb_t fdbuf, void *pVoid, size_t size) {
     // Check parameters
     if(fdbuf == NULL)
         return -1;
 
-    if(buf == NULL)
+    if(pVoid == NULL)
         return -2;
 
     // Actually read the data from the file descriptor
+    char *buf = (char *) pVoid; // sizeof(char) == 1
     size_t totalCapacity = size;
+    size_t bufStart = 0;
 
     while(size > 0) {
         // Check if fdbuf->buffer requires refilling
@@ -168,10 +194,10 @@ ssize_t fdb_read(fdb_t fdbuf, void *buf, size_t size) {
 
         size -= bytesAvailable;
 
-        memcpy(buf, fdbuf->buffer + fdbuf->start, bytesAvailable);
+        memcpy(buf + bufStart, fdbuf->buffer + fdbuf->start, bytesAvailable);
         fdbuf->start += bytesAvailable;
 
-        buf += bytesAvailable;
+        bufStart += bytesAvailable;
     }
 
     // Returns the number of bytes effectively read from the buffer
@@ -328,13 +354,24 @@ int fdb_fopen(fdb_t *fdbuf, const char *path, int flags, mode_t mode) {
     }
     
     // Create a new fdbuf and return it
-    return fdb_create(fd, fdbuf);
+    if(fdb_create(fdbuf, fd) != 0)
+        return -5;
+    (*fdbuf)->path = path;
+    (*fdbuf)->flags = flags;
+    (*fdbuf)->mode = mode;
+
+    // Success
+    return 0;
 }
 
 int fdb_fclose(fdb_t fdbuf) {
     // Check parameters
     if(fdbuf == NULL)
         return -1;
+
+    // Veriicar se o file descriptor é válido
+    if(fdbuf->fd < 0)
+        return fdb_destroy(fdbuf); // O fd já está fechado, destruir o fdbuffer...
     
     // Close the file descriptor
     int res = close(fdbuf->fd);
@@ -370,4 +407,47 @@ int fdb_lseek(fdb_t fdbuf, off_t offset, int seekFlags) {
 
     // Sucesso!
     return offset;
+}
+
+int fdb_mkfifo(fdb_t *fdbufLoc, const char *path, int flags, mode_t mode) {
+    // Verificar parâmetros
+    if(fdbufLoc == NULL)
+        return -1;
+
+    if(path == NULL)
+        return -2;
+
+    // Criar a fifo
+    if(mkfifo(path, mode) != 0)
+        return -3;
+
+    // Criar um fdb_t para a FIFO
+    if(fdb_create(fdbufLoc, -1) != 0)
+        return -4;
+    (*fdbufLoc)->path = path;
+    (*fdbufLoc)->flags = flags;
+    (*fdbufLoc)->mode = mode;
+    (*fdbufLoc)->is_fifo = true;
+
+    // Não abrimos a FIFO porque a chamada open() poderia bloquear, e apenas queremos que bloqueie nos reads
+
+    // Sucesso
+    return 0;
+}
+
+int fdb_unlink(fdb_t fdbuf) {
+    // Verificar parâmetris
+    if(fdbuf == NULL)
+        return -1;
+
+    // Dar unlink da FIFO
+    if(unlink(fdbuf->path) != 0)
+        return -2;
+
+    // Verificar se o file descriptor da FIFO ainda está aberto, e fechar se for o caso
+    if(fdb_fclose(fdbuf) != 0)
+        return -5;
+
+    // Sucesso
+    return 0;
 }
