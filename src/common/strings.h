@@ -9,6 +9,14 @@
 /** @brief Guarda uma referência ao fdbuffer que lê e escreve para o ficheiro das STRINGS. */
 extern fdb_t g_pFdbStrings;
 
+/** @brief Define o início da primeira string presente no ficheiro de strings. */
+#define INICIO_FICHEIRO_STRINGS (sizeof(long) << 1)
+
+/** @brief Preenchida automaticamente aquando do carregamento do ficheiro STRINGS, guarda o número total de strings existentes no ficheiro. */
+extern long g_iNumeroStringsTotal;
+/** @brief Preenchida automaticamente aquando do carregamento do ficheiro STRINGS, guarda o número de strings que foram marcadas para eliminação. */
+extern long g_iNumeroStringsMarcadas;
+
 /**
  * @brief Referência a uma string no ficheiro de STRINGS.
  */
@@ -20,6 +28,13 @@ typedef struct string_ref {
     /** @brief Valor efetivo da string, ou NULL se ainda não tiver sido preenchida. */
     const char *string;
 } *string_t;
+
+/**
+ * @brief Inicializa o ficheiro de STRINGS e popula automaticamente as variáveis globais a partir do disco.
+ *
+ * @return 0 em caso de sucesso, <0 em caso de erro
+ */
+int inicializar_ficheiro_strings();
 
 /**
  * @brief Cria uma nova referência a uma string do ficheiro STRINGS.
@@ -50,6 +65,15 @@ int string_load(size_t offset, string_t *strRef);
  * @return O offset onde a string ficou guardada no ficheiro
  */
 ssize_t string_save(const char *string);
+
+/**
+ * @brief Marca uma string para eliminação do ficheiro de STRINGS.
+ *
+ * @param offset O offset da string a marcar
+ *
+ * @return 0 se tudo correu bem, <0 em caso de erro
+ */
+int string_mark(ssize_t offset);
 
 /**
  * @brief Liberta a memória utilizada pela referência de uma string.

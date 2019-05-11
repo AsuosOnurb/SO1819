@@ -28,9 +28,8 @@ int main(int argc, const char *argv[]) {
     char **argvMA = (char**)malloc((bytes_to_read/2) * sizeof(char*));
     int i;
 
-    file_open(&g_pFdbStrings, "STRINGS", true, true);
+    inicializar_ficheiro_strings();
     inicializar_ficheiro_artigos();
-
 
     //verifica se cria o ficheiro SRTINGS
     while ((number_of_read_bytes = read(0, buffer, bytes_to_read)) > 0){
@@ -74,6 +73,7 @@ int main(int argc, const char *argv[]) {
 
 
     }
+
     file_close(g_pFdbStrings);
     file_close(g_pFdbArtigos);
 

@@ -32,7 +32,7 @@ int main(int argc, const char *argv[]) {
     // Inicializar os ficheiros necessários
     setlocale(LC_ALL, "Portuguese");
 
-    file_open(&g_pFdbStrings, NOME_FICHEIRO_STRINGS, true, true);
+    inicializar_ficheiro_strings();
     inicializar_ficheiro_artigos();
     file_open(&g_pFdbStocks, NOME_FICHEIRO_STOCKS, true, true);
     file_open(&g_pFdbVendas, NOME_FICHEIRO_VENDAS, true, true);

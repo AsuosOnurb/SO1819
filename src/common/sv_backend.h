@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include "fdb.h"
 
+/** @brief Nome da FIFO do servidor. */
 #define SV_FIFO_NAME "sv_fifo"
 
 /** @brief Define que a instrução de mostrar o stock e o preço tem o ID 1. */
@@ -13,8 +14,10 @@
 /** @brief Define que a instrução de correr o agregador tem o ID 3. */
 #define SV_INSTRUCTION_EXECUTAR_AG ((instruction_t) 3)
 
+/** @brief Define o tipo de uma instrução a enviar ao servidor, para este ser consistente entre todos os que necessitam dele. */
 typedef char instruction_t;
 
+/** @brief Fdbuffer de leitura do FIFO do servidor. */
 extern fdb_t g_pFdbServerFifo;
 
 /**
