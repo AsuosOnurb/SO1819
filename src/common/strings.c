@@ -115,11 +115,11 @@ ssize_t string_save(const char *string) {
         return -6;
 
     // Incrementar o número total de strings
-    g_iNumeroStringsMarcadas += 1;
-    if(fdb_lseek(g_pFdbStrings, sizeof(long), SEEK_SET) != 0)
+    g_iNumeroStringsTotal += 1;
+    if(fdb_lseek(g_pFdbStrings, 0, SEEK_SET) != 0)
         return -7;
 
-    if(fdb_write(g_pFdbStrings, &g_iNumeroStringsMarcadas, sizeof(long)) != 0)
+    if(fdb_write(g_pFdbStrings, &g_iNumeroStringsTotal, sizeof(long)) != 0)
         return -8;
 
     // Retornar o offset da string guardada
@@ -140,6 +140,14 @@ int string_mark(ssize_t offset) {
     static const char flag = 0;
     if(fdb_write(g_pFdbStrings, &flag, sizeof(flag)) != 0)
         return -3;
+
+    // Incrementar o número total de strings marcadas
+    g_iNumeroStringsMarcadas += 1;
+    if(fdb_lseek(g_pFdbStrings, sizeof(long), SEEK_SET) != sizeof(long))
+        return -7;
+
+    if(fdb_write(g_pFdbStrings, &g_iNumeroStringsMarcadas, sizeof(long)) != 0)
+        return -8;
 
     // Sucesso
     return 0;
