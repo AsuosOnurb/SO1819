@@ -71,13 +71,11 @@ int sv_get_info_artigo(long codigoArtigo, long *quantidade, double *preco) {
     // Esta instrução lê do pipe de resposta os seguintes argumentos:
     // long => quantidade
     // double => preço
-    char response[sizeof(long) + sizeof(preco)];
-    if(fdb_read(fdbResponseFifo, response, sizeof(response)) <= 0)
+    if(fdb_read(fdbResponseFifo, quantidade, sizeof(*quantidade)) <= 0)
         return -3;
 
-    // Processar a resposta
-    memcpy(quantidade, response, sizeof(long)); // Processar a quantidade
-    memcpy(preco, response + sizeof(long), sizeof(double)); // Processar o preço
+    if(fdb_read(fdbResponseFifo, preco, sizeof(*preco)) <= 0)
+        return -4;
 
     // Fechar o file descriptor da fifo de resposta
     if(fdb_unlink(fdbResponseFifo) != 0)
@@ -88,6 +86,40 @@ int sv_get_info_artigo(long codigoArtigo, long *quantidade, double *preco) {
 }
 
 int sv_update_mostra_stock(long codigoArtigo, long acrescento, long *novoStock) {
-    // TODO
-    return (int) codigoArtigo + acrescento + (long long) novoStock -1;
+    // Esta instrução escreve no pipe os seguintes argumentos:
+    // long => codigo
+    // long => acrescento/quantidade
+    // pid_t => pid do processo que requereu os dados
+
+    char params[sizeof(codigoArtigo) + sizeof(acrescento)];
+    memcpy(params, &codigoArtigo, sizeof(codigoArtigo));
+
+    // O PID atual vai servir para identificar a fifo a partir da qual o servidor vai responder ao cliente
+    pid_t pid = getpid();
+
+    // Obter o PID do processo como string
+    char pidStr[128];
+    sprintf(pidStr, "%d", pid);
+
+    // Abrir um file descriptor para a fifo de resposta, que automaticamente cria essa mesma fifo
+    fdb_t fdbResponseFifo;
+    if(fdb_mkfifo(&fdbResponseFifo, pidStr, O_RDONLY, 0644) != 0)
+        return -1;
+
+    // Enviar ao servidor a instrução
+    if(sv_send_instruction(SV_INSTRUCTION_ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK, params, sizeof(params), pid) != 0)
+        return -2;
+
+    // Read the response as soon as it becomes available
+    // Esta instrução lê do pipe de resposta os seguintes argumentos:
+    // long => novoStock
+    if(fdb_read(fdbResponseFifo, novoStock, sizeof(*novoStock)) <= 0)
+        return -3;
+
+    // Fechar o file descriptor da fifo de resposta
+    if(fdb_unlink(fdbResponseFifo) != 0)
+        return -4;
+
+    // Sucesso!
+    return 0;
 }
