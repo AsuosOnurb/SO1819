@@ -25,9 +25,9 @@ int main(int argc, const char *argv[]) {
 
     // Inicializar file descriptor buffers para o stdin e stdout
     fdb_t fdbStdin, fdbStdout, fdbStderr;
-    fdb_create(STDIN_FILENO, &fdbStdin);
-    fdb_create(STDOUT_FILENO, &fdbStdout);
-    fdb_create(STDERR_FILENO, &fdbStderr);
+    fdb_create(&fdbStdin, STDIN_FILENO);
+    fdb_create(&fdbStdout, STDOUT_FILENO);
+    fdb_create(&fdbStderr, STDERR_FILENO);
 
     // Inicializar os ficheiros necessários
     setlocale(LC_ALL, "Portuguese");
@@ -38,14 +38,11 @@ int main(int argc, const char *argv[]) {
     file_open(&g_pFdbVendas, NOME_FICHEIRO_VENDAS, true, true);
 
     // Criar e abrir a fifo necessária à comunicação
-    int fifoFd;
-    if((fifoFd = mkfifo(SV_FIFO_NAME, 0644)) < 0) {
-        fdb_printf(fdbStdout, "Não foi possível criar uma FIFO para o servidor receber instruções! Errcode: %ld\n", fifoFd);
+    fdb_t fdbFifo;
+    if(fdb_mkfifo(&fdbFifo, SV_FIFO_NAME, O_RDONLY, 0644) != 0) {
+        fdb_printf(fdbStdout, "Não foi possível criar uma FIFO para o servidor receber instruções! Terminando...\n");
         return -2;
     }
-
-    fdb_t fdbFifo;
-    fdb_create(STDIN_FILENO, &fdbFifo); // Unlikely to fail
 
     // Este servidor funciona com instruções:
     // Lê a partir do fifo um código de instrução (uma char)
@@ -53,9 +50,9 @@ int main(int argc, const char *argv[]) {
     // Depois, no código responsável por processar cada instrução, lê a partir do pipe os argumentos respetivos dessa instrução,
     // que se encontram descritos abaixo
     instruction_t instruction;
-    while(fdb_read(fdbFifo, &instruction, 1) == 1) {
+    while(fdb_read(fdbFifo, &instruction, sizeof(instruction)) == 1) {
         char *result = NULL;
-        ssize_t dataSize = 0;
+        size_t dataSize = 0;
 
         if(instruction == SV_INSTRUCTION_MOSTRAR_STOCK_E_PRECO) {
             // Esta instrução lê do pipe os seguintes argumentos:

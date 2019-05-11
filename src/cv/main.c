@@ -14,7 +14,6 @@
 #include "cv.h"
 
 
-
 int main(int argc, const char *argv[]) {
 
     if (argc > 1) {
@@ -26,9 +25,9 @@ int main(int argc, const char *argv[]) {
     char *buffer = (char *) malloc(bytes_to_read * sizeof(char));
     char **argArray = (char **) malloc((bytes_to_read / 2) * sizeof(char *));
 
-    // CV doesn't need to write to "STRINGS" nor to "ARTIGOS"
-    file_open(&g_pFdbStrings, "STRINGS", 1, 0);
-    file_open(&g_pFdbArtigos, "ARTIGOS", 1, 0);
+    // CV doesn't need to read or write from and to "STRINGS" nor to "ARTIGOS"
+    // file_open(&g_pFdbStrings, "STRINGS", true, false);
+    // file_open(&g_pFdbArtigos, "ARTIGOS", true, false);
 
     inicializar_ficheiro_artigos();
 
@@ -87,8 +86,8 @@ int main(int argc, const char *argv[]) {
 
     }
 
-    file_close(g_pFdbStrings);
-    file_close(g_pFdbArtigos);
+    // file_close(g_pFdbStrings);
+    // file_close(g_pFdbArtigos);
 
     return 0;
 }
