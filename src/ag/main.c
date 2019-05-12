@@ -1,6 +1,7 @@
 #include "ag.h"
 
 int main() {
-    // ADD STUFF HERE
+    // O AG recebe do stdin várias entradas de venda e começa a agregá-las todas numa só venda
+
     return 0;
 }

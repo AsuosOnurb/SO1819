@@ -92,7 +92,8 @@ int venda_save(venda_t venda) {
         if((venda->offset = fdb_lseek(g_pFdbVendas, 0, SEEK_END)) < 0) {
             venda->offset = -1;
             return -3;
-        }
+        } else if(venda->offset == 0)
+            venda->offset += INICIO_ENTRADAS_VENDA;
     } else {
         if(fdb_lseek(g_pFdbVendas, venda->offset, SEEK_SET) != venda->offset)
             return -4;
