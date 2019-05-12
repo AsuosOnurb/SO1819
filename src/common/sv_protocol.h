@@ -21,7 +21,7 @@ typedef char instruction_t;
 extern fdb_t g_pFdbServerFifo;
 
 /**
- * @brief Macro de utilizadade para automaticamente e consistentemente calcular o formato e nome do FIFO de resposta de um PID.
+ * @brief Macro de utilidade para automaticamente e consistentemente calcular o formato e nome do FIFO de resposta de um PID.
  *
  * @param pid Pid do processo que vai receber a resposta
  * @param strPidResposta Onde guardar a string formatada com o nome do FIFO de resposta

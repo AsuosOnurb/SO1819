@@ -11,6 +11,8 @@
 #include "../common/strings.h"
 #include "../common/util.h"
 
+#include "../sv/sv.h"
+
 #include "ma.h"
 
 #define bytes_to_read 64
@@ -44,7 +46,7 @@ int main() {
         argvMA[i-1] = strtok(argvMA[i-1], "\n");
 
 
-
+        // Inserção de um artigo
         if(strcmp (argvMA[0],"i") == 0){
             long codigo;
             char *nomeArtigo = argvMA[1];
@@ -53,19 +55,22 @@ int main() {
 
             codigo = insere_artigo(nomeArtigo, precoArtigo);
             printf("%ld\n", codigo);
-
-        } else if(strcmp (argvMA[0],"n") == 0){
+        } else if (strcmp(argvMA[0], "n") == 0) { // Mudar nome d'um artigo
             int resultado;
             resultado = alteraNome(argvMA);
             if (resultado < 0) {
                 printf("O nome do seu artigo não foi alterado. Tente novamente!\nErro %d: erro no alteraNome()", resultado);
             }
-        } else if (strcmp (argvMA[0],"p") == 0){
+        } else if (strcmp(argvMA[0], "p") == 0) { // Mudar preço de um artigo
             int resultado;
             resultado = alteraPreco(argvMA);
             if (resultado < 0) {
                 printf("O nome do seu artigo não foi alterado. Tente novamente!\nErro %d: erro no alteraPreco()", resultado);
             }
+        } else if (strcmp(argvMA[0], "a") == 0) { // Invoccar o agregador
+            // Invocar o agregador
+            sv_agrega();
+
         }
 
 

@@ -6,5 +6,4 @@
 
 
 
-
 #endif //SO1819_CV_H

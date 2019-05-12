@@ -86,3 +86,7 @@ int atualiza_mostra_stock(long codigoArtigo, long acrescento, long *novoStock) {
     // Sucesso
     return 0;
 }
+
+void sv_agrega() {
+    // DO IMPORTANT STUFF?
+}
