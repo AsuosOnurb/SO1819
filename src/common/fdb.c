@@ -282,7 +282,7 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
         size += bytesToRead;
     }
 
-    *buf = '\0'; // Null-terminate the string
+    *(++buf) = '\0'; // Null-terminate the string
 
     // Return the number of bytes effectively read from the buffer
     return totalCapacity - size;

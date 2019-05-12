@@ -29,7 +29,8 @@ typedef struct venda {
 // #define TAMANHO_ENTRADA_VENDA (sizeof(long) + sizeof(long) + sizeof(long))
 
 /** @brief Define o offset no ficheiro STOCKS onde aparece a primeira entrada do stock de um artigo. */
-#define INICIO_ENTRADAS_VENDA (sizeof(long))
+#define INICIO_ENTRADAS_VENDA 0
+// (sizeof(long))
 
 
 /**

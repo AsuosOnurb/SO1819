@@ -52,7 +52,7 @@ int venda_load(ssize_t offset, venda_t *vendaRef) {
 
     // Carregar os dados do disco
 
-    // Carregar o código do artigo vendido
+    /*// Carregar o código do artigo vendido
     if(fdb_read(g_pFdbVendas, &venda->codigo, sizeof(venda->codigo)) <= 0) {
         venda_free(venda);
         return -5;
@@ -68,7 +68,26 @@ int venda_load(ssize_t offset, venda_t *vendaRef) {
     if(fdb_read(g_pFdbVendas, &venda->montante, sizeof(venda->montante)) <= 0) {
         venda_free(venda);
         return -7;
+    }*/
+
+    size_t bufferSize = 512, start = 0;
+    char *line = (char *) malloc(sizeof(char) * bufferSize);
+
+    ssize_t bytesRead;
+    while((bytesRead = fdb_readln(g_pFdbVendas, line + start, bufferSize)) > 0) {
+        // Make sure we read a full line
+        if(line[bytesRead - 1] != '\n') {
+            start = bufferSize;
+            bufferSize *= 2;
+            line = realloc(line, sizeof(char) * bufferSize);
+            continue;
+        } else break;
     }
+
+    // Interpretar a linha
+    sscanf(line, "%ld %ld %lf\n", &venda->codigo, &venda->quantidade, &venda->montante);
+
+    free(line);
 
     // Sucesso!
     *vendaRef = venda;
@@ -95,13 +114,16 @@ int venda_save(venda_t venda) {
         } else if(venda->offset == 0)
             venda->offset += INICIO_ENTRADAS_VENDA;
     } else {
-        if(fdb_lseek(g_pFdbVendas, venda->offset, SEEK_SET) != venda->offset)
-            return -4;
+        // if(fdb_lseek(g_pFdbVendas, venda->offset, SEEK_SET) != venda->offset)
+        //    return -4;
+
+        // Não é possível guardar vendas que não sejam novas vendas!!!
+        return -4;
     }
 
     // Efetivamente guardar a venda no disco
 
-    // Guardar o código do artigo vendido
+    /*// Guardar o código do artigo vendido
     if(fdb_write(g_pFdbVendas, &venda->codigo, sizeof(venda->codigo)) != 0)
         return -5;
 
@@ -111,7 +133,11 @@ int venda_save(venda_t venda) {
 
     // Guardar o montante total da venda
     if(fdb_write(g_pFdbVendas, &venda->montante, sizeof(venda->montante)) != 0)
-        return -7;
+        return -7; */
+
+    // Escrever a venda no disco
+    if(fdb_printf(g_pFdbVendas, "%ld %ld %lf\n", venda->codigo, venda->quantidade, venda->montante) < 0)
+        return -5;
 
     // Sucesso!
     return 0;
