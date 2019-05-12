@@ -59,7 +59,7 @@ int atualiza_mostra_stock(long codigoArtigo, long acrescento, long *novoStock) {
 
     // Escrever a venda em VENDAS se delta < 0
     if (acrescento < 0) {
-        // Carregar o artigo parar consultar o seu preço
+        // Carregar o artigo para consultar o seu preço
         artigo_t artigo;
         if (artigo_load(codigoArtigo, &artigo) != 0)
             return -3;
