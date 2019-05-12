@@ -39,8 +39,10 @@ long insere_artigo(char *nomeArtigo, double precoArtigo) {
         printf("Algo correu mal: insere_artigo():39 = %d\n", errorCode);
     }
 
-    return novoArtigo->codigo;
+    long codigo = novoArtigo->codigo;
+    artigo_free(novoArtigo);
 
+    return codigo;
 }
 
 

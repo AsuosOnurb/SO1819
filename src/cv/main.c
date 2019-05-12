@@ -100,12 +100,16 @@ int main() {
     // file_close(g_pFdbStrings);
     // file_close(g_pFdbArtigos);
 
+    free(buffer);
+    free(argArray);
     client_shutdown();
 
     return 0;
 }
 
 void client_shutdown() {
+    file_close(g_pFdbServerFifo);
+
     fdb_destroy(fdbStdin);
     fdb_destroy(fdbStdout);
     fdb_destroy(fdbStderr);

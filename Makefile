@@ -14,10 +14,10 @@ EXECUTABLE_AG := ag
 # Which objects to place in each executable.
 # Objects are assumed to be located under the src/ directory,
 # and are assumed to have no extensions (these are added automatically)
-EXECUTABLE_MA_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_backend common/util common/venda ma/ma ma/main
-EXECUTABLE_SV_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_backend common/util common/venda sv/sv sv/main
-EXECUTABLE_CV_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_backend common/util common/venda cv/cv cv/main
-EXECUTABLE_AG_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_backend common/util common/venda ag/ag ag/main
+EXECUTABLE_MA_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_protocol common/util common/venda ma/ma ma/main
+EXECUTABLE_SV_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_protocol common/util common/venda sv/sv sv/main
+EXECUTABLE_CV_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_protocol common/util common/venda cv/cv cv/main
+EXECUTABLE_AG_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_protocol common/util common/venda ag/ag ag/main
 
 # Compiler to use
 GCC := gcc

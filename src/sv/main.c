@@ -162,8 +162,7 @@ void server_shutdown() {
     file_close(g_pFdbStrings);
 
     // Fechar a fifo de comunicação
-    file_close(g_pFdbServerFifo);
-    unlink(SV_FIFO_NAME);
+    fdb_unlink(g_pFdbServerFifo);
 
     // Fechar os fdb_ts do stdin, stdout e stderr
     fdb_destroy(fdbStderr);

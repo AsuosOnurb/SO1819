@@ -58,12 +58,9 @@ int fdb_destroy(fdb_t fdbuf) {
     if(fdbuf == NULL)
         return -1;
 
-    // We don't destroy fifos ever
-    // This flag will be unset when necessary
-    if(fdbuf->is_fifo)
-        return 0;
-
     // Release buffer and struct memory
+    if(fdbuf->path != NULL)
+        free(fdbuf->path);
     free(fdbuf->buffer);
     free(fdbuf);
 
@@ -225,9 +222,9 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
     if(buf == NULL)
         return -2;
 
-    if(*buf == '\n')
-        // Se o valor do buffer na posição 0 for já um '\n', o loop abaixo de leitura nunca irá começar, logo, vamos removê-lo
-        *buf = '\0';
+    // Se o valor do buffer na posição 0 for já um '\n', o loop abaixo de leitura nunca irá começar, logo, vamos removê-lo
+    // Visto que o buffer nos foi dado para ser overwritten, não há problema de darmos overwrite
+    *buf = '\0';
 
     size_t totalCapacity = size;
 

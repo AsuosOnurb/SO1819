@@ -16,6 +16,9 @@
 #define bytes_to_read 64
 
 int main() {
+    fdb_t fdbStdin;
+    fdb_create(&fdbStdin, STDIN_FILENO);
+
     setlocale(LC_ALL, "Portuguese");
     size_t number_of_read_bytes;
     char *buffer = (char*)malloc(bytes_to_read * sizeof(char));
@@ -26,7 +29,8 @@ int main() {
     inicializar_ficheiro_artigos();
 
     //verifica se cria o ficheiro SRTINGS
-    while ((number_of_read_bytes = read(0, buffer, bytes_to_read)) > 0){
+    // while ((number_of_read_bytes = read(0, buffer, bytes_to_read)) > 0){
+    while((number_of_read_bytes = fdb_readln(fdbStdin, buffer, bytes_to_read)) > 0) {
         i = 0;
         argvMA[i] = strtok(buffer," ");
         if (strlen(argvMA[i]) == number_of_read_bytes) {
@@ -68,8 +72,11 @@ int main() {
 
     }
 
+    free(buffer);
+    free(argvMA);
     file_close(g_pFdbStrings);
     file_close(g_pFdbArtigos);
+    fdb_destroy(fdbStdin);
 
     return 0;
 }
