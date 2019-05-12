@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for i in $(seq 1 $1)
+do
+    ./bin/production/cv < cv_in.txt > /dev/null &
+done
+
+wait

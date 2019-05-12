@@ -8,13 +8,26 @@
 #include "../common/strings.h"
 #include "../common/util.h"
 #include "../common/artigo.h"
-#include "../common/sv_backend.h"
+#include "../common/sv_protocol.h"
 #include "../ma/ma.h"
 
 #include "cv.h"
 
+void client_shutdown();
+
+fdb_t fdbStdin, fdbStdout, fdbStderr;
+
+void client_startup() {
+    // Inicializar file descriptor buffers para o stdin e stdout e stderr, pouco provável de falhar
+    fdb_create(&fdbStdin, STDIN_FILENO);
+    fdb_create(&fdbStdout, STDOUT_FILENO);
+    fdb_create(&fdbStderr, STDERR_FILENO);
+}
+
 
 int main() {
+    client_startup();
+
     setlocale(LC_ALL, "Portuguese");
     char *buffer = (char *) malloc(bytes_to_read * sizeof(char));
     char **argArray = (char **) malloc((bytes_to_read / 2) * sizeof(char *));
@@ -23,10 +36,11 @@ int main() {
     // file_open(&g_pFdbStrings, "STRINGS", true, false);
     // file_open(&g_pFdbArtigos, "ARTIGOS", true, false);
 
-    inicializar_ficheiro_artigos();
+    // inicializar_ficheiro_artigos();
 
     // Get input from user
-    while ((read(0, buffer, bytes_to_read)) > 0) {
+    // while ((read(0, buffer, bytes_to_read)) > 0) {
+    while(fdb_readln(fdbStdin, buffer, bytes_to_read) > 0 && fdbStdin->eof == false) {
 
         // Split user input into an array of strings
         int argCount = 0;
@@ -38,6 +52,8 @@ int main() {
             argArray[++argCount] = token;
         }
 
+        if(argCount <= 0)
+            continue;
 
         long codigoArtigo = strtol(argArray[0], NULL, 10); // char* -> long
 
@@ -49,13 +65,13 @@ int main() {
 
             // Check for errors
             if (errorVal < 0) {
-                printf("Algo correu mal: cv/main.c():60 = %d\n", errorVal);
+                fdb_printf(fdbStderr, "Algo correu mal: cv/main.c:69 = %d\n", errorVal);
                 return errorVal;
             }
 
             // Print the info
-            printf("%ld\n", quantidade);
-            printf("%f\n", preco);
+            fdb_printf(fdbStdout, "%ld\n", quantidade);
+            fdb_printf(fdbStdout, "%f\n", preco);
 
         } else if (argCount == 2) {
             // Ask SV to update the stock quantity
@@ -65,12 +81,12 @@ int main() {
 
             // Check for errors
             if (errorVal < 0) {
-                printf("Algo correu mal: cv/main.c():75 = %d\n", errorVal);
+                fdb_printf(fdbStderr, "Algo correu mal: cv/main.c:85 = %d\n", errorVal);
                 return errorVal;
             }
 
             // Print the updated stock
-            printf("%ld\n", novaQuantidadeStock);
+            fdb_printf(fdbStdout, "%ld\n", novaQuantidadeStock);
 
 
         } else {
@@ -78,10 +94,21 @@ int main() {
             return -1;
         }
 
+        // memset(buffer, '\0', bytes_to_read);// Prevenir o readln() de retornar imediatamente sem ler!
     }
 
     // file_close(g_pFdbStrings);
     // file_close(g_pFdbArtigos);
 
+    client_shutdown();
+
     return 0;
+}
+
+void client_shutdown() {
+    fdb_destroy(fdbStdin);
+    fdb_destroy(fdbStdout);
+    fdb_destroy(fdbStderr);
+
+    _exit(0);
 }

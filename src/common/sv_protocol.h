@@ -1,5 +1,5 @@
-#ifndef SO1819_SV_BACKEND_H
-#define SO1819_SV_BACKEND_H
+#ifndef SO1819_SV_PROTOCOL_H
+#define SO1819_SV_PROTOCOL_H
 
 #include <stddef.h>
 #include "fdb.h"
@@ -26,7 +26,7 @@ extern fdb_t g_pFdbServerFifo;
  * @param pid Pid do processo que vai receber a resposta
  * @param strPidResposta Onde guardar a string formatada com o nome do FIFO de resposta
  */
-#define calcularFifoResposta(p, s) sprintf((s), "pid_%d", (p))
+#define calcularFifoResposta(p, s) sprintf((s), "fifo_%d", (p))
 
 /**
  * @brief Envia uma instrução ao servidor de vendas.
@@ -62,4 +62,4 @@ int sv_get_info_artigo(long codigoArtigo, long *quantidade, double *preco);
  */
 int sv_update_mostra_stock(long codigoArtigo, long acrescento, long *novoStock);
 
-#endif //SO1819_SV_BACKEND_H
+#endif //SO1819_SV_PROTOCOL_H

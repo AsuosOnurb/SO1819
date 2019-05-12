@@ -27,7 +27,7 @@ typedef struct fdb {
     /** @brief Verdadeiro se atingimos EOF. */
     bool eof;
     /** @brief Nome do ficheiro associado, se existir e foi possível obter. */
-    const char *path;
+    char *path;
     /** @brief Flags do ficheiro associado, se existir. */
     int flags;
     /** @brief Modo de permissões para abrir o ficheiro. */

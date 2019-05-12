@@ -11,7 +11,7 @@
 #include "../common/artigo.h"
 #include "../common/stock.h"
 #include "../common/strings.h"
-#include "../common/sv_backend.h"
+#include "../common/sv_protocol.h"
 #include "../common/util.h"
 #include "../common/venda.h"
 
@@ -100,7 +100,7 @@ int main() {
                 fdb_write(fdbFifoResposta, &quantidade, sizeof(quantidade));
                 fdb_write(fdbFifoResposta, &preco, sizeof(preco));
 
-                printf("[MOSTRAR_STOCK_E_PRECO] [LOG] [%d] Codigo=%ld; Quantidade=%ld, Preço=%f\n", getpid(), codigo, quantidade, preco);
+                printf("[MOSTRAR_STOCK_E_PRECO] [LOG] [%d] Codigo=%ld; Quantidade=%ld, Preço=%f\n", requesterPid, codigo, quantidade, preco);
             }
         } else if(instruction == SV_INSTRUCTION_ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK) {
             // Esta instrução lê do pipe os seguintes argumentos:
@@ -131,7 +131,7 @@ int main() {
                 fdb_write(fdbFifoResposta, &success, sizeof(success));
                 fdb_write(fdbFifoResposta, &novoStock, sizeof(novoStock));
 
-                printf("[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] [LOG] [%d] Codigo=%ld, Quantidade=%ld; NovoStock=%ld\n", getpid(), codigo, acrescento, novoStock);
+                printf("[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] [LOG] [%d] Codigo=%ld, Quantidade=%ld; NovoStock=%ld\n", requesterPid, codigo, acrescento, novoStock);
             }
         } else if(instruction == SV_INSTRUCTION_EXECUTAR_AG) {
             // TODO: Mandar executar o AG!
@@ -139,8 +139,10 @@ int main() {
 
         }
 
-        if(!success)
+        if(!success) {
             fdb_write(fdbFifoResposta, &success, sizeof(success));
+            fdb_printf(fdbStderr, "Erro ao processar uma instrução %d!\n", instruction);
+        }
 
         // Fechar o FIFO de resposta
         file_close(fdbFifoResposta);

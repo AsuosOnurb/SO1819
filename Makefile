@@ -52,7 +52,7 @@ OBJ_DIR := obj
 ## Flags
 
 ### Are we building the debug binaries?
-debug ?= true
+debug ?= false
 
 ifeq ($(debug), true)
 	GCC_FLAGS += $(GCC_DEBUG_FLAGS)

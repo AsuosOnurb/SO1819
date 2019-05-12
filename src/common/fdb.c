@@ -93,14 +93,16 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
 
     // Before anything else, we must check if we're dealing with a FIFO
     // If we are and the FIFO is closed, open it
-    if(fdbuf->is_fifo && fdbuf->fd == -1) {
-        if((fdbuf->fd = open(fdbuf->path, fdbuf->flags, fdbuf->mode)) < 0)
+    if(fdbuf->is_fifo && fdbuf->fd < 0) {
+        if((fdbuf->fd = open(fdbuf->path, fdbuf->flags, fdbuf->mode)) < 0) {
+            perror("fdbuffer_fillbuf::open() failed");
             return -3;
+        }
 
         // Do a system call to get the block size
         struct stat sb;
         if(fstat(fdbuf->fd, &sb) != 0)
-            return -2;
+            return -4;
 
         fdbuf->size = (size_t) sb.st_blksize;
         fdbuf->buffer = (char *) realloc(fdbuf->buffer, sizeof(char) * fdbuf->size);
@@ -111,8 +113,8 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
 
     // Check if the system call succeeded
     if(bytesRead < 0) {
-        perror("read() failed: ");
-        return -4; // Syscall failed
+        perror("fdbuffer_fillbuf::read() failed: ");
+        return -5; // Syscall failed
     }
 
     // Check if EOF reached, and set eof flag on struct if so
@@ -121,7 +123,8 @@ ssize_t fdbuffer_fillbuf(fdb_t fdbuf) {
             // In FIFOs, reads() don't block if there's no other end of the pipe open for writing
             // In these cases, only open() blocks until there's another end of the pipe open for writing
             // Because of this, we must close the file descriptor and reopen it
-            close(fdbuf->fd);
+            if(close(fdbuf->fd) != 0)
+                perror("fdbuffer_fillbuf::close() failed");
             fdbuf->fd = -1;
 
             return fdbuffer_fillbuf(fdbuf);
@@ -278,7 +281,7 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
         size += bytesToRead;
     }
 
-    *(++buf) = '\0'; // Null-terminate the string
+    *buf = '\0'; // Null-terminate the string
 
     // Return the number of bytes effectively read from the buffer
     return totalCapacity - size;
@@ -366,7 +369,7 @@ int fdb_fopen(fdb_t *fdbuf, const char *path, int flags, mode_t mode) {
     // Create a new fdbuf and return it
     if(fdb_create(fdbuf, fd) != 0)
         return -5;
-    (*fdbuf)->path = path;
+    (*fdbuf)->path = strcpy((char *) malloc(strlen(path) + 1), path);
     (*fdbuf)->flags = flags;
     (*fdbuf)->mode = mode;
 
@@ -434,7 +437,7 @@ int fdb_mkfifo(fdb_t *fdbufLoc, const char *path, int flags, mode_t mode) {
     // Criar um fdb_t para a FIFO
     if(fdb_create(fdbufLoc, -1) != 0)
         return -4;
-    (*fdbufLoc)->path = path;
+    (*fdbufLoc)->path = strcpy((char *) malloc(strlen(path) + 1), path);
     (*fdbufLoc)->flags = flags;
     (*fdbufLoc)->mode = mode;
     (*fdbufLoc)->is_fifo = true;

@@ -2,10 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <zconf.h>
-#include "sv_backend.h"
+
+#include <unistd.h>
+#include <fcntl.h>
+
 #include "fdb.h"
 #include "util.h"
+
+#include "sv_protocol.h"
 
 fdb_t g_pFdbServerFifo = NULL;
 
