@@ -4,14 +4,14 @@
 #include <string.h>
 #include <locale.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "../common/fdb.h"
 #include "../common/commands.h"
 #include "../common/artigo.h"
 #include "../common/strings.h"
 #include "../common/util.h"
-
-#include "../sv/sv.h"
+#include "../common/sv_protocol.h"
 
 #include "ma.h"
 
@@ -68,12 +68,9 @@ int main() {
                 printf("O nome do seu artigo não foi alterado. Tente novamente!\nErro %d: erro no alteraPreco()", resultado);
             }
         } else if (strcmp(argvMA[0], "a") == 0) { // Invoccar o agregador
-            // Invocar o agregador
-            sv_agrega();
+            sv_send_instruction(SV_INSTRUCTION_EXECUTAR_AG, NULL, 0, getpid());
 
         }
-
-
 
     }
 

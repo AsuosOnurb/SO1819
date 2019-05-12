@@ -75,6 +75,7 @@ int main() {
 
         } else if (argCount == 2) {
             // Ask SV to update the stock quantity
+
             long acrescento = strtol(argArray[1], NULL, 10);
             long novaQuantidadeStock;
             int errorVal = sv_update_mostra_stock(codigoArtigo, acrescento, &novaQuantidadeStock);
