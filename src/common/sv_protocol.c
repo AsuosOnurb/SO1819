@@ -68,28 +68,38 @@ int sv_get_info_artigo(long codigoArtigo, long *quantidade, double *preco) {
         return -1;
 
     // Enviar ao servidor a instrução
-    if(sv_send_instruction(SV_INSTRUCTION_MOSTRAR_STOCK_E_PRECO, params, sizeof(params), pid) != 0)
+    if(sv_send_instruction(SV_INSTRUCTION_MOSTRAR_STOCK_E_PRECO, params, sizeof(params), pid) != 0) {
+        fdb_unlink(fdbResponseFifo);
         return -2;
+    }
 
     // Read the response as soon as it becomes available
 
     // Verificar, antes de tudo, se a resposta indica que foi bem sucedida
     bool sucesso;
-    if(fdb_read(fdbResponseFifo, &sucesso, sizeof(sucesso)) <= 0)
+    if(fdb_read(fdbResponseFifo, &sucesso, sizeof(sucesso)) <= 0) {
+        fdb_unlink(fdbResponseFifo);
         return -3;
+    }
 
     // Verificar se a execução da instrução foi bem sucedida
-    if(!sucesso)
+    if(!sucesso) {
+        fdb_unlink(fdbResponseFifo);
         return -4;
+    }
 
     // Esta instrução lê do pipe de resposta os seguintes argumentos:
     // long => quantidade
     // double => preço
-    if(fdb_read(fdbResponseFifo, quantidade, sizeof(*quantidade)) <= 0)
+    if(fdb_read(fdbResponseFifo, quantidade, sizeof(*quantidade)) <= 0) {
+        fdb_unlink(fdbResponseFifo);
         return -5;
+    }
 
-    if(fdb_read(fdbResponseFifo, preco, sizeof(*preco)) <= 0)
+    if(fdb_read(fdbResponseFifo, preco, sizeof(*preco)) <= 0) {
+        fdb_unlink(fdbResponseFifo);
         return -6;
+    }
 
     // Fechar o file descriptor da fifo de resposta
     if(fdb_unlink(fdbResponseFifo) != 0)
@@ -122,22 +132,30 @@ int sv_update_mostra_stock(long codigoArtigo, long acrescento, long *novoStock) 
         return -1;
 
     // Enviar ao servidor a instrução
-    if(sv_send_instruction(SV_INSTRUCTION_ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK, params, sizeof(params), pid) != 0)
+    if(sv_send_instruction(SV_INSTRUCTION_ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK, params, sizeof(params), pid) != 0) {
+        fdb_unlink(fdbResponseFifo);
         return -2;
+    }
 
     // Read the response as soon as it becomes available
     bool sucesso;
-    if(fdb_read(fdbResponseFifo, &sucesso, sizeof(sucesso)) <= 0)
+    if(fdb_read(fdbResponseFifo, &sucesso, sizeof(sucesso)) <= 0) {
+        fdb_unlink(fdbResponseFifo);
         return -3;
+    }
 
     // Verificar se a execução da instrução foi bem sucedida
-    if(!sucesso)
+    if(!sucesso) {
+        fdb_unlink(fdbResponseFifo);
         return -4;
+    }
 
     // Esta instrução lê do pipe de resposta os seguintes argumentos:
     // long => novoStock
-    if(fdb_read(fdbResponseFifo, novoStock, sizeof(*novoStock)) <= 0)
+    if(fdb_read(fdbResponseFifo, novoStock, sizeof(*novoStock)) <= 0) {
+        fdb_unlink(fdbResponseFifo);
         return -5;
+    }
 
     // Fechar o file descriptor da fifo de resposta
     if(fdb_unlink(fdbResponseFifo) != 0)

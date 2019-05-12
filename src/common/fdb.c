@@ -224,7 +224,7 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
 
     // Se o valor do buffer na posição 0 for já um '\n', o loop abaixo de leitura nunca irá começar, logo, vamos removê-lo
     // Visto que o buffer nos foi dado para ser overwritten, não há problema de darmos overwrite
-    *buf = '\0';
+    memset(buf, '\0', size);
 
     size_t totalCapacity = size;
 

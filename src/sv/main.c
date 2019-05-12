@@ -43,7 +43,7 @@ void server_startup() {
 
     // Criar e abrir a fifo necessária à comunicação
     if(fdb_mkfifo(&g_pFdbServerFifo, SV_FIFO_NAME, O_RDONLY, 0644) != 0) {
-        fdb_printf(fdbStdout, "Não foi possível criar uma FIFO para o servidor receber instruções! Terminando...\n");
+        fdb_printf(fdbStderr, "Não foi possível criar uma FIFO para o servidor receber instruções! Terminando...\n");
         server_shutdown();
     }
 }
@@ -77,7 +77,7 @@ bool exec_mostrar_stock_e_preco(pid_t requesterPid, fdb_t fdbFifoResposta) {// E
     fdb_write(fdbFifoResposta, &quantidade, sizeof(quantidade));
     fdb_write(fdbFifoResposta, &preco, sizeof(preco));
 
-    printf("[MOSTRAR_STOCK_E_PRECO] [LOG] [%d] Codigo=%ld; Quantidade=%ld, Preço=%f\n", requesterPid, codigo, quantidade, preco);
+    fdb_printf(fdbStdout, "[MOSTRAR_STOCK_E_PRECO] [LOG] [%d] Codigo=%ld; Quantidade=%ld, Preço=%f\n", requesterPid, codigo, quantidade, preco);
 
     return true;
 }
@@ -114,15 +114,12 @@ bool exec_atualizar_stock_mostrar_novo_stock(pid_t requesterPid, fdb_t fdbFifoRe
 
     fdb_write(fdbFifoResposta, &novoStock, sizeof(novoStock));
 
-    printf("[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] [LOG] [%d] Codigo=%ld, Quantidade=%ld; NovoStock=%ld\n", requesterPid, codigo, acrescento, novoStock);
+    fdb_printf(fdbStdout, "[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] [LOG] [%d] Codigo=%ld, Quantidade=%ld; NovoStock=%ld\n", requesterPid, codigo, acrescento, novoStock);
 
     return true;
 }
 
 void exec_ag(pid_t requesterPid) {
-    // Criar uma pipe para onde enviar a input do ag
-    int inputPipe[2];
-    pipe(inputPipe);
 
     // Antes de executar o AG, precisamos de saber quando se deu a última agregação
     // O offset onde se deu a última agregação está guardado na posição 0 do ficheiro de vendas
@@ -137,6 +134,18 @@ void exec_ag(pid_t requesterPid) {
         return;
     }
 
+    // Fazer lseek para o fim do ficheiro
+    ssize_t offsetFimFicheiroVendas;
+    if((offsetFimFicheiroVendas = fdb_lseek(g_pFdbVendas, 0, SEEK_END)) < 0) {
+        fdb_printf(fdbStderr, "[EXECUTAR_AG] [LOG] [%d] Erro ao modificar o offset da agregação!\n", requesterPid);
+        return;
+    }
+
+    if(offsetFimFicheiroVendas == offsetUltimaAgregacao) {
+        fdb_printf(fdbStderr, "[EXECUTAR_AG] [LOG] [%d] Não é necessário executar o AG!\n", requesterPid);
+        return;
+    }
+
     // Fazer lseek para a posição da última agregação
     if(fdb_lseek(g_pFdbVendas, offsetUltimaAgregacao, SEEK_SET) != offsetUltimaAgregacao) {
         fdb_printf(fdbStderr, "[AG] [LOG] Não foi possível fazer lseek para o offset da última agregação! (Será que já foram feitas vendas?)\n");
@@ -145,20 +154,24 @@ void exec_ag(pid_t requesterPid) {
         // fdb_printf(fdbStderr, "[AG] [LOG] Feito lseek para a última posição de agregação: %ld\n", offsetUltimaAgregacao);
     }
 
+    // Criar uma pipe para onde enviar a input do ag
+    int inputPipe[2];
+    pipe(inputPipe);
+
+    // Obter a data e hora atuais
+    time_t rawtime;
+    time(&rawtime);
+
+    // Converter para string
+    char outputFileName[1024];
+    strftime(outputFileName, sizeof(outputFileName), "%FT%T.txt", localtime(&rawtime));
+
     // Executar o AG num processo separado
     pid_t childProcess = fork();
 
     if(childProcess == 0) {
         // Fechar o lado de escrita
         close(inputPipe[1]);
-
-        // Obter a data e hora atuais
-        time_t rawtime;
-        time(&rawtime);
-
-        // Converter para string
-        char outputFileName[1024];
-        strftime(outputFileName, sizeof(outputFileName), "%FT%T.txt", localtime(&rawtime));
 
         // O AG deve executar num processo separado, com o stdin redirecionado e o stdout também
 
@@ -200,11 +213,7 @@ void exec_ag(pid_t requesterPid) {
         ssize_t bytesRead;
         char buf[4096];
         while((bytesRead = fdb_read(g_pFdbVendas, buf, sizeof(buf))) > 0) {
-            // static const char newline = '\n';
             fdb_write(fdbInputPipe, buf, bytesRead);
-            // fdb_write(fdbInputPipe, &newline, 1);
-            // fprintf(stderr, buf, bytesRead);
-            // fprintf(stderr, "bytesRead=%ld\n", bytesRead);
         }
 
         // Fechar o lado de escrita
@@ -221,21 +230,18 @@ void exec_ag(pid_t requesterPid) {
         }
 
         // Modificar o offset da última agregação
-        ssize_t offsetUltimaAgregacao;
-        if((offsetUltimaAgregacao = fdb_lseek(g_pFdbVendas, 0, SEEK_END)) < 0) {
-            fdb_printf(fdbStderr, "[EXECUTAR_AG] [LOG] [%d] Erro ao modificar o offset da agregação!\n", requesterPid);
-            return;
-        }
 
         if(fdb_lseek(g_pFdbVendas, 0, SEEK_SET) != 0) {
             fdb_printf(fdbStderr, "[EXECUTAR_AG] [LOG] [%d] Erro ao fazer lseek para modificar o offset da última agregação!\n", requesterPid);
             return;
         }
 
-        if(fdb_write(g_pFdbVendas, &offsetUltimaAgregacao, sizeof(offsetUltimaAgregacao)) != 0) {
+        if(fdb_write(g_pFdbVendas, &offsetFimFicheiroVendas, sizeof(offsetFimFicheiroVendas)) != 0) {
             fdb_printf(fdbStderr, "[EXECUTAR_AG] [LOG] [%d] Erro ao modificar o offset da última agregação!\n", requesterPid);
             return;
         }
+
+        fdb_printf(fdbStdout, "[EXECUTAR_AG] [LOG] [%d] Executado o AG; guardado como %s.", outputFileName);
     }
 }
 
@@ -280,7 +286,7 @@ int main() {
 
         if(!success) {
             fdb_write(fdbFifoResposta, &success, sizeof(success));
-            fdb_printf(fdbStderr, "Erro ao processar uma instrução %d!\n", instruction);
+            // fdb_printf(fdbStderr, "Erro ao processar uma instrução %d!\n", instruction);
         }
 
         // Fechar o FIFO de resposta

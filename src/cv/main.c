@@ -64,9 +64,12 @@ int main() {
             int errorVal = sv_get_info_artigo(codigoArtigo, &quantidade, &preco);
 
             // Check for errors
-            if (errorVal < 0) {
+            if(errorVal == -4) {
+                fdb_printf(fdbStderr, "Ocorreu um erro no servidor ao processar o seu pedido!\n");
+                continue;
+            } else if (errorVal < 0) {
                 fdb_printf(fdbStderr, "Algo correu mal: cv/main.c:69 = %d\n", errorVal);
-                return errorVal;
+                continue;
             }
 
             // Print the info
@@ -81,9 +84,12 @@ int main() {
             int errorVal = sv_update_mostra_stock(codigoArtigo, acrescento, &novaQuantidadeStock);
 
             // Check for errors
-            if (errorVal < 0) {
+            if(errorVal == -4) {
+                fdb_printf(fdbStderr, "Ocorreu um erro no servidor ao processar o seu pedido!\n");
+                continue;
+            } else if (errorVal < 0) {
                 fdb_printf(fdbStderr, "Algo correu mal: cv/main.c:85 = %d\n", errorVal);
-                return errorVal;
+                continue;
             }
 
             // Print the updated stock
