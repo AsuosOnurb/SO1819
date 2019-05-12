@@ -1,3 +1,6 @@
+# Este script serviu para gerar os vários ficheiros de dados
+# Atualmente é inútil, a menos que queiramos gerar novos testes
+
 import os
 import random
 
