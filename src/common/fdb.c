@@ -225,6 +225,10 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
     if(buf == NULL)
         return -2;
 
+    if(*buf == '\n')
+        // Se o valor do buffer na posição 0 for já um '\n', o loop abaixo de leitura nunca irá começar, logo, vamos removê-lo
+        *buf = '\0';
+
     size_t totalCapacity = size;
 
     --size; // Make space for the finishing '\0' character
