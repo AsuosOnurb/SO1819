@@ -17,7 +17,7 @@ EXECUTABLE_AG := ag
 EXECUTABLE_MA_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_protocol common/util common/venda ma/ma ma/main
 EXECUTABLE_SV_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_protocol common/util common/venda sv/sv sv/main
 EXECUTABLE_CV_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_protocol common/util common/venda cv/cv cv/main
-EXECUTABLE_AG_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_protocol common/util common/venda ag/ag ag/main
+EXECUTABLE_AG_OBJECTS := common/artigo common/commands common/fdb common/stock common/strings common/sv_protocol common/util common/venda ag/main
 
 # Compiler to use
 GCC := gcc
