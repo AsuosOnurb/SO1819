@@ -17,6 +17,10 @@
 
 #define bytes_to_read 64
 
+void shutdown() {
+
+}
+
 int main() {
     fdb_t fdbStdin;
     fdb_create(&fdbStdin, STDIN_FILENO);
@@ -69,7 +73,8 @@ int main() {
             }
         } else if (strcmp(argvMA[0], "a") == 0) { // Invoccar o agregador
             sv_send_instruction(SV_INSTRUCTION_EXECUTAR_AG, NULL, 0, getpid());
-
+            file_close(g_pFdbServerFifo);
+            g_pFdbServerFifo = NULL;
         }
 
     }

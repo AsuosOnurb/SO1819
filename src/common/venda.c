@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "util.h"
 
@@ -76,13 +77,15 @@ int venda_load(ssize_t offset, venda_t *vendaRef) {
     ssize_t bytesRead;
     while((bytesRead = fdb_readln(g_pFdbVendas, line + start, bufferSize)) > 0) {
         // Make sure we read a full line
-        if(line[bytesRead - 1] != '\n') {
+        if(line[bytesRead - 2] != '\n') {
             start = bufferSize;
             bufferSize *= 2;
             line = realloc(line, sizeof(char) * bufferSize);
             continue;
         } else break;
     }
+
+    venda->diskSize = strlen(line) + 1;
 
     // Interpretar a linha
     sscanf(line, "%ld %ld %lf\n", &venda->codigo, &venda->quantidade, &venda->montante);
@@ -111,14 +114,20 @@ int venda_save(venda_t venda) {
         if((venda->offset = fdb_lseek(g_pFdbVendas, 0, SEEK_END)) < 0) {
             venda->offset = -1;
             return -3;
-        } else if(venda->offset == 0)
+        } else if(venda->offset == 0) {
+            // Inicializar o ficheiro de vendas
+            static const ssize_t offsetPrimeiraAgregacao = INICIO_ENTRADAS_VENDA;
+            if(fdb_write(g_pFdbVendas, &offsetPrimeiraAgregacao, sizeof(offsetPrimeiraAgregacao)) != 0)
+                return -4;
+
             venda->offset += INICIO_ENTRADAS_VENDA;
+        }
     } else {
         // if(fdb_lseek(g_pFdbVendas, venda->offset, SEEK_SET) != venda->offset)
         //    return -4;
 
         // Não é possível guardar vendas que não sejam novas vendas!!!
-        return -4;
+        return -5;
     }
 
     // Efetivamente guardar a venda no disco
@@ -136,8 +145,8 @@ int venda_save(venda_t venda) {
         return -7; */
 
     // Escrever a venda no disco
-    if(fdb_printf(g_pFdbVendas, "%ld %ld %lf\n", venda->codigo, venda->quantidade, venda->montante) < 0)
-        return -5;
+    if((venda->diskSize = fdb_printf(g_pFdbVendas, "%ld %ld %lf\n", venda->codigo, venda->quantidade, venda->montante)) < 0)
+        return -6;
 
     // Sucesso!
     return 0;

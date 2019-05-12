@@ -62,4 +62,10 @@ int sv_get_info_artigo(long codigoArtigo, long *quantidade, double *preco);
  */
 int sv_update_mostra_stock(long codigoArtigo, long acrescento, long *novoStock);
 
+/**
+ * @brief Começa o processo de agregação.<br>
+ * Faz a agregação desde a última vez até ao momento em que este método foi invocado.
+ */
+int sv_agrega();
+
 #endif //SO1819_SV_PROTOCOL_H

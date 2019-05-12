@@ -2,7 +2,7 @@
 
 for i in $(seq 1 $1)
 do
-    ./bin/production/cv < cv_in_neg.txt > /dev/null &
+    cd ./bin/production/ && ./cv < ../../cv_in_neg.txt > /dev/null &
 done
 
 wait

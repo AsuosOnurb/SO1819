@@ -13,8 +13,6 @@
 
 fdb_t g_pFdbServerFifo = NULL;
 
-
-
 int sv_send_instruction(instruction_t instructionCode, const char *params, size_t dataSize, pid_t currentPid) {
     // First, make sure we have a communication pipe with the server
     if(g_pFdbServerFifo == NULL)

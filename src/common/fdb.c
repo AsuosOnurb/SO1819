@@ -239,8 +239,7 @@ ssize_t fdb_readln(fdb_t fdbuf, char *buf, size_t size) {
             // Check if refill was successful
             if(bytesRead == 0) {
                 // Refill unsuccessful: we have reached EOF.
-                // Return buf as null, and return 0 on this function
-                *buf = '\0';
+                // Return 0 on this function
                 return 0;
             }
             else if(bytesRead < 0)

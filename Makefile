@@ -65,13 +65,13 @@ else
 endif
 
 ### Which object are we building?
-bin ?= $(firstword $(MAKECMDGOALS))
+bin_name ?= $(firstword $(MAKECMDGOALS))
 
-ifeq ($(bin),)
-bin := all
+ifeq ($(bin_name),)
+bin_name := all
 endif
 
-bin := $(addprefix $(OUT_DIR)/, $(bin))
+bin := $(addprefix $(OUT_DIR)/, $(bin_name))
 
 ### Name of the zip file?
 zipname ?= $(PROJECT_NAME).zip
@@ -160,22 +160,22 @@ setup:
 #### Cleans up all binaries, objects, documentation, created zip files, and marks the project as not setup
 clean:
 #	Apaga os diretórios, conteúdo e ficheiros chamados: setup, bin, doc, obj, install, $(zipname)
-	rm -rf setup bin doc obj $(zipname) ARTIGOS STOCKS STRINGS VENDAS fifo_*
+	rm -rf setup bin doc obj $(zipname) ARTIGOS STOCKS STRINGS VENDAS.txt fifo_*
 
 
 ### Runnable targets
 
 #### Runs the specified binary normally
 run: $(bin)
-	./$(bin)
+	cd ./$(OUT_DIR)/ && ./$(bin_name)
 
 #### Execute the specified binary through gdb
 run-gdb: $(bin)
-	$(GDB) $(GDB_FLAGS) $(bin)
+	cd ./$(OUT_DIR)/ && $(GDB) $(GDB_FLAGS) ./$(bin_name)
 
 #### Execute the program through strace
 run-strace: $(bin)
-	$(STRACE) $(STRACE_FLAGS) $(bin)
+	cd ./$(OUT_DIR)/ && $(STRACE) $(STRACE_FLAGS) ./$(bin_name)
 
 ### Other targets
 
