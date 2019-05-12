@@ -183,7 +183,10 @@ void exec_ag(pid_t requesterPid) {
 
     // Criar uma pipe para onde enviar a input do ag
     int inputPipe[2];
-    pipe(inputPipe);
+    if(pipe(inputPipe) != 0) {
+        fdb_printf(fdbStderr, "[AG] [LOG] Não foi possível criar uma pipe para enviar ao agregador os seus dados!\n");
+        return;
+    }
 
     // Obter a data e hora atuais
     time_t rawtime;

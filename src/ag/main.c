@@ -77,6 +77,7 @@ int main() {
     for(long codigo = 0; codigo < g_iProximoCodigoUtilizavel; codigo++) {
         venda_t venda = vendasAgregadas[codigo];
         fdb_printf(fdbStdout, "%ld %ld %lf\n", venda->codigo, venda->quantidade, venda->montante);
+        venda_free(venda);
     }
 
     fdb_fclose(fdbStdin);
