@@ -13,6 +13,8 @@
 #define SV_INSTRUCTION_ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK ((instruction_t) 2)
 /** @brief Define que a instrução de correr o agregador tem o ID 3. */
 #define SV_INSTRUCTION_EXECUTAR_AG ((instruction_t) 3)
+/** @brief Define que a instrução de invalidar um item da cache de artigos tem o ID 4. */
+#define SV_INSTRUCTION_INVALIDAR_CACHE_ARTIGOS ((instruction_t) 4)
 
 /** @brief Define o tipo de uma instrução a enviar ao servidor, para este ser consistente entre todos os que necessitam dele. */
 typedef char instruction_t;

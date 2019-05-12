@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for i in $(seq 1 $1)
+do
+    cd ./bin/$2/ && ./cv < ../../cv_in_neg_rnd_10ki.txt > /dev/null &
+done
+
+wait

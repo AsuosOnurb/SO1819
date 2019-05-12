@@ -72,14 +72,14 @@ bool exec_mostrar_stock_e_preco(pid_t requesterPid, fdb_t fdbFifoResposta) {// E
 
     long codigo;
     if(fdb_read(g_pFdbServerFifo, &codigo, sizeof(codigo)) < 0) {
-        fdb_printf(fdbStderr, "[MOSTRAR_STOCK_E_PRECO] Erro ao ler o código do artigo do FIFO! Terminando...\n");
+        fdb_printf(fdbStderr, "[MOSTRAR_STOCK_E_PRECO] [%d] Erro ao ler o código do artigo do FIFO! Terminando...\n", requesterPid);
         return false;
     }
 
     long quantidade;
     double preco;
     if(mostra_info_artigo(codigo, &quantidade, &preco) != 0) {
-        fdb_printf(fdbStderr, "[MOSTRAR_STOCK_E_PRECO] Não foi possível obter as informações do artigo %ld!\n", codigo);
+        fdb_printf(fdbStderr, "[MOSTRAR_STOCK_E_PRECO] [%d] Não foi possível obter as informações do artigo %ld!\n", requesterPid, codigo);
         return false;
     }
 
@@ -91,7 +91,7 @@ bool exec_mostrar_stock_e_preco(pid_t requesterPid, fdb_t fdbFifoResposta) {// E
     fdb_write(fdbFifoResposta, &quantidade, sizeof(quantidade));
     fdb_write(fdbFifoResposta, &preco, sizeof(preco));
 
-    fdb_printf(fdbStdout, "[MOSTRAR_STOCK_E_PRECO] [LOG] [%d] Codigo=%ld; Quantidade=%ld, Preço=%f\n", requesterPid, codigo, quantidade, preco);
+    // fdb_printf(fdbStdout, "[MOSTRAR_STOCK_E_PRECO] [LOG] [%d] Codigo=%ld; Quantidade=%ld, Preço=%f\n", requesterPid, codigo, quantidade, preco);
 
     return true;
 }
@@ -114,19 +114,19 @@ bool exec_atualizar_stock_mostrar_novo_stock(pid_t requesterPid, fdb_t fdbFifoRe
 
     long codigo;
     if(fdb_read(g_pFdbServerFifo, &codigo, sizeof(codigo)) < 0) {
-        fdb_printf(fdbStderr, "[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] Erro ao ler o código do artigo do FIFO! Terminando...\n");
+        fdb_printf(fdbStderr, "[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] [%d] Erro ao ler o código do artigo do FIFO! Terminando...\n", requesterPid);
         return false;
     }
 
     long acrescento;
     if(fdb_read(g_pFdbServerFifo, &acrescento, sizeof(acrescento)) < 0) {
-        fdb_printf(fdbStderr, "[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] Erro ao ler o acrescento do FIFO! Terminando...\n");
+        fdb_printf(fdbStderr, "[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] [%d] Erro ao ler o acrescento do FIFO! Terminando...\n", requesterPid);
         return false;
     }
 
     long novoStock;
     if(atualiza_mostra_stock(codigo, acrescento, &novoStock) != 0) {
-        fdb_printf(fdbStderr, "[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] Não foi possível atualizar o stock do artigo! Terminando...\n");
+        fdb_printf(fdbStderr, "[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] [%d] Não foi possível atualizar o stock do artigo! Terminando...\n", requesterPid);
         return false;
     }
 
@@ -136,7 +136,7 @@ bool exec_atualizar_stock_mostrar_novo_stock(pid_t requesterPid, fdb_t fdbFifoRe
 
     fdb_write(fdbFifoResposta, &novoStock, sizeof(novoStock));
 
-    fdb_printf(fdbStdout, "[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] [LOG] [%d] Codigo=%ld, Quantidade=%ld; NovoStock=%ld\n", requesterPid, codigo, acrescento, novoStock);
+    // fdb_printf(fdbStdout, "[ATUALIZAR_STOCK_E_MOSTRAR_NOVO_STOCK] [LOG] [%d] Codigo=%ld, Quantidade=%ld; NovoStock=%ld\n", requesterPid, codigo, acrescento, novoStock);
 
     return true;
 }
@@ -271,8 +271,20 @@ void exec_ag(pid_t requesterPid) {
             return;
         }
 
-        fdb_printf(fdbStdout, "[EXECUTAR_AG] [LOG] [%d] Executado o AG; guardado como %s.", outputFileName);
+        // fdb_printf(fdbStdout, "[EXECUTAR_AG] [LOG] [%d] Executado o AG; guardado como %s.", outputFileName);
     }
+}
+
+bool exec_invalidar_cache_artigos(pid_t requesterPid) {
+    long codigo;
+    if(fdb_read(g_pFdbServerFifo, &codigo, sizeof(codigo)) <= 0) {
+        fdb_printf(fdbStderr, "[INVALIDAR_CACHE_ARTIGOS] [LOG] [%d] Não foi possível ler o código do artigo da FIFO! Terminando...\n", requesterPid);
+        return false;
+    }
+
+    artigo_cache_invalidate(codigo);
+
+    return true;
 }
 
 /**
@@ -297,10 +309,14 @@ int main() {
             break;
         }
 
+        // A instrução de executar o AG e de invalidar um item da cache têm handler especial, pois estas não aceitam FIFO de resposta
         if(instruction == SV_INSTRUCTION_EXECUTAR_AG) {
-            // A instrução de executar o AG tem código especial, pois esta não aceita FIFO de resposta
             exec_ag(requesterPid);
             continue;
+        } else if(instruction == SV_INSTRUCTION_INVALIDAR_CACHE_ARTIGOS) {
+            if(exec_invalidar_cache_artigos(requesterPid))
+                continue;
+            else break;
         }
 
         char requesterPidStr[128];

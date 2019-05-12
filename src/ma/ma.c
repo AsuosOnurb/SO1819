@@ -11,6 +11,7 @@
 #include "../common/artigo.h"
 #include "../common/strings.h"
 #include "../common/util.h"
+#include "../common/sv_protocol.h"
 
 #define bytes_to_read 64
 
@@ -70,6 +71,9 @@ int alteraNome(char** argvMA){
 
     artigo_free(artigo);
 
+    // Informar o servidor da alteração de nome
+    sv_send_instruction(SV_INSTRUCTION_INVALIDAR_CACHE_ARTIGOS, (const char *) &codigo, sizeof(codigo), getpid());
+
     return 0;
 }
 
@@ -96,6 +100,9 @@ int alteraPreco(char** argvMA){
     }
 
     artigo_free(artigo);
+
+    // Informar o servidor da alteração de preço
+    sv_send_instruction(SV_INSTRUCTION_INVALIDAR_CACHE_ARTIGOS, (const char *) &codigo, sizeof(codigo), getpid());
 
     return 0;
 }

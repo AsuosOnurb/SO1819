@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "fdb.h"
 #include "artigo.h"
@@ -8,6 +9,63 @@
 fdb_t g_pFdbArtigos = NULL;
 
 long g_iProximoCodigoUtilizavel;
+
+// Cache atualmente desativada
+// #define DISABLE_CACHE
+
+#define ARTIGOS_CACHE_SIZE (512)
+#define ARTIGOS_CACHE_THRESHOLD (10)
+#define ARTIGOS_CACHE_START (3 * ARTIGOS_CACHE_THRESHOLD)
+
+typedef struct artigo_cache_entry {
+    artigo_t artigo;
+    int hits;
+} artigo_cache_entry_t;
+
+static artigo_cache_entry_t cacheArtigos[ARTIGOS_CACHE_SIZE];
+
+/**
+ * @brief Calcula a posição em cache de um determinado artigo, dado o seu código.<br>
+ * Utiliza linear probing para resolver conflitos.<br>
+ *
+ * @param codigo O código do artigo a procurar a sua hash na cache
+ *
+ * @return a hash do artigo na cache, que pode não corresponder ao prório artigo se não existir espaço para ele
+ */
+long hash(long codigo) {
+#ifdef DISABLE_CACHE
+    return -1;
+#else
+    long iFirstTimedout = -1;
+
+    for(long i = 0; i < ARTIGOS_CACHE_SIZE; i++) {
+        artigo_cache_entry_t *entry = &cacheArtigos[i];
+
+        if(iFirstTimedout == -1 && entry->hits < ARTIGOS_CACHE_THRESHOLD)
+            iFirstTimedout = i;
+
+        if(entry->artigo != NULL && entry->artigo->codigo == codigo)
+            return i;
+
+        entry->hits--;
+    }
+
+    return iFirstTimedout;
+#endif
+}
+
+void artigo_cache_invalidate(long codigo) {
+    long h = hash(codigo);
+
+    if(h >= 0 && cacheArtigos[h].artigo != NULL && cacheArtigos[h].artigo->codigo == codigo) {
+        cacheArtigos[h].hits = 0;
+        artigo_free(cacheArtigos[h].artigo);
+
+        // fprintf(stderr, "Invalidada a cache do artigo %ld\n", codigo);
+    } else {
+        // fprintf(stderr, "O artigo %ld não está em cache!\n", codigo);
+    }
+}
 
 int inicializar_ficheiro_artigos() {
     // Abrir um file descriptor associado ao ficheiro
@@ -65,6 +123,20 @@ void artigo_free(artigo_t artigo) {
     if(artigo == NULL)
         return;
 
+    // Não eliminar artigos que estejam em cache e que esta ainda não tenha expirado
+    time_t the_time;
+    time(&the_time);
+
+    long h = hash(artigo->codigo);
+    if(h >= 0 && cacheArtigos[h].artigo != NULL && cacheArtigos[h].artigo->codigo == artigo->codigo) {
+        // este artigo ainda está em cache, verificar se jaá expirou!
+        if(cacheArtigos[h].hits < ARTIGOS_CACHE_THRESHOLD) {
+            // O artigo pode ser eliminado da cache
+            cacheArtigos[h].artigo = NULL;
+            cacheArtigos[h].hits = 0;
+        } else return; // Don't let the item be freed
+    }
+
     // Libertar a memória do artigo
     free(artigo);
 }
@@ -76,6 +148,16 @@ int artigo_load(long codigo, artigo_t *artigoRef) {
 
     if(artigoRef == NULL)
         return -2;
+
+    // Verificar se o artigo já está em cache
+    long h = hash(codigo);
+    if(h >= 0 && cacheArtigos[h].artigo != NULL && cacheArtigos[h].artigo->codigo == codigo) {
+        // Cache hit: dar refresh no artigo na cache
+        *artigoRef = cacheArtigos[h].artigo;
+        cacheArtigos[h].hits++;
+
+        return 0;
+    }
 
     // Verificar se o ficheiro está aberto
     if(g_pFdbArtigos == NULL)
@@ -123,6 +205,13 @@ int artigo_load(long codigo, artigo_t *artigoRef) {
 
     // Sucesso!
     *artigoRef = artigo;
+
+    // Colocar o artigo em cache
+    if(h >= 0) {
+        cacheArtigos[h].artigo = artigo;
+        cacheArtigos[h].hits = ARTIGOS_CACHE_START;
+        // fprintf(stderr, "Colocado em cache o artigo %ld na posição %ld\n", codigo, h);
+    }
     return 0;
 }
 

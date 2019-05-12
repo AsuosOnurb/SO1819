@@ -43,6 +43,13 @@ typedef struct artigo {
 extern long g_iProximoCodigoUtilizavel;
 
 /**
+ * @brief Invalida um artigo da cache.
+ *
+ * @param codigo O código do artigo cuja cache deve ser invalidada
+ */
+void artigo_cache_invalidate(long codigo);
+
+/**
  * @brief Função responsável por inicializar a partir do disco o ficheiro de ARTIGOS.<br>
  * É também responsável por obter a partir do ficheiro, aquando da sua inicialização,
  * o próximo código disponível para utilizar por um novo artigo que poderá vir a ser criado.<br>
