@@ -13,10 +13,16 @@
 
 #include "cv.h"
 
+/**
+ * @brief Função responsável por libertar os recursos utilizados pelo cliente, e encerrar.
+ */
 void client_shutdown();
 
 fdb_t fdbStdin, fdbStdout, fdbStderr;
 
+/**
+ * @brief Função responsável por inicializar os recursos necessários ao bom funcionamento do cliente.
+ */
 void client_startup() {
     // Inicializar file descriptor buffers para o stdin e stdout e stderr, pouco provável de falhar
     fdb_create(&fdbStdin, STDIN_FILENO);
@@ -24,7 +30,11 @@ void client_startup() {
     fdb_create(&fdbStderr, STDERR_FILENO);
 }
 
-
+/**
+ * @brief Função principal de execução do cliente.
+ *
+ * @return 0 se tudo correu bem, !=0 em caso de erro
+ */
 int main() {
     client_startup();
 

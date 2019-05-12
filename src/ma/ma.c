@@ -16,12 +16,6 @@
 
 #define MAX (1024*1024)
 
-/**
- * Vai inserir no ficheiro ARTIGOS: Código, endereço da posição do nome no ficheiro STRINGS e preço.
- * Vai inserir no ficheiro SRTINGS: Endereço de posição do nome do artigo e o nome do artigo.
- */
-
-
 long insere_artigo(char *nomeArtigo, double precoArtigo) {
     // Criar string nova
     ssize_t offsetNome = string_save(nomeArtigo);
@@ -45,20 +39,12 @@ long insere_artigo(char *nomeArtigo, double precoArtigo) {
     return codigo;
 }
 
-
-/**
- * Vai alterar o nome de um dado artigo.
- * Primeiro, acrescenta ao ficheiro STRINGS e atribui-lhe um novo endereco.
- * Segundo, vai atualizar o ficheiro Artigos com o novo endereço do nome do artigo.
- */
-
-
 int alteraNome(char** argvMA){
     ssize_t offsetName = string_save(argvMA[1]);
 
     if (offsetName < 0){
         printf("Linha 115. alteraNome()\nErro %ld: %s", offsetName, strerror(errno));
-        return 1;
+        return -1;
     }
 
     long codigo = strtol(argvMA[1], NULL, 10);
@@ -69,7 +55,7 @@ int alteraNome(char** argvMA){
 
     if (offset < 0){
         printf("Linha 121. alteraNome()\nErro %d: %s", offset, strerror(errno));
-        return 2;
+        return -2;
     }
 
     string_mark(artigo->offsetNome);
@@ -90,11 +76,13 @@ int alteraNome(char** argvMA){
 
 int alteraPreco(char** argvMA){
     long codigo = strtol(argvMA[1], NULL, 10);
+
     artigo_t artigo;
     int offset = artigo_load(codigo, &artigo);
 
     if (offset < 0){
         printf("Linha 166. alteraPreco()\n Erro %d: %s", offset, strerror((errno)));
+        return -1;
     }
 
     double precoArtigo = strtod(argvMA[2], NULL);
@@ -111,9 +99,3 @@ int alteraPreco(char** argvMA){
 
     return 0;
 }
-
-//void todosCodigos();
-
-
-
-

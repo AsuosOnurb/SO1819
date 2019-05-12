@@ -17,10 +17,11 @@
 
 #define bytes_to_read 64
 
-void shutdown() {
-
-}
-
+/**
+ * @brief Função principal do binário de manutenção de artigos.
+ *
+ * @return 0 se correu tudo bem, !=0 em caso de erro
+ */
 int main() {
     fdb_t fdbStdin;
     fdb_create(&fdbStdin, STDIN_FILENO);

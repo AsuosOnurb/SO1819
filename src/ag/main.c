@@ -10,8 +10,11 @@
 #include "../common/util.h"
 #include "../common/venda.h"
 
-#include "ag.h"
-
+/**
+ * @brief Função principal de execução do agregador.
+ *
+ * @return 0 se tudo correu bem, !=0 em caso de erro
+ */
 int main() {
     // Consultar o número de artigos disponíveis para venda
     inicializar_ficheiro_artigos();

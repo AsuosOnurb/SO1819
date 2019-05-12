@@ -19,10 +19,16 @@
 
 #include "sv.h"
 
+/**
+ * @brief Função responsável por libertar os recursos utilizados pelo servidor, mesmo em caso de erro ou sinal.
+ */
 void server_shutdown();
 
 fdb_t fdbStdin, fdbStdout, fdbStderr;
 
+/**
+ * @brief Função responsável por configurar o ambiente inicial do servidor.
+ */
 void server_startup() {
     // Inicializar file descriptor buffers para o stdin e stdout e stderr, pouco provável de falhar
     fdb_create(&fdbStdin, STDIN_FILENO);
@@ -48,6 +54,14 @@ void server_startup() {
     }
 }
 
+/**
+ * @brief Função responsável por processar a instrução de mostrar o stock e preço de um artigo.
+ *
+ * @param requesterPid PID do processo requerente de execução do Agregador
+ * @param fdbFifoResposta Fdbuffer correspondente à FIFO pela qual vamos responder ao cliente
+ *
+ * @return True se tudo correu bem; false em caso de erro
+ */
 bool exec_mostrar_stock_e_preco(pid_t requesterPid, fdb_t fdbFifoResposta) {// Esta instrução lê do pipe os seguintes argumentos:
     // long => codigo
     // pid_t => pid do processo que requereu os dados
@@ -82,6 +96,14 @@ bool exec_mostrar_stock_e_preco(pid_t requesterPid, fdb_t fdbFifoResposta) {// E
     return true;
 }
 
+/**
+ * @brief Função responsável por processar a instrução de atualizar o stock e mostrar o novo stock.
+ *
+ * @param requesterPid PID do processo requerente de execução do Agregador
+ * @param fdbFifoResposta Fdbuffer correspondente à FIFO pela qual vamos responder ao cliente
+ *
+ * @return True se tudo correu bem; false em caso de erro
+ */
 bool exec_atualizar_stock_mostrar_novo_stock(pid_t requesterPid, fdb_t fdbFifoResposta) {// Esta instrução lê do pipe os seguintes argumentos:
     // long => codigo
     // long => quantidade
@@ -119,6 +141,11 @@ bool exec_atualizar_stock_mostrar_novo_stock(pid_t requesterPid, fdb_t fdbFifoRe
     return true;
 }
 
+/**
+ * @brief Função respnsável por configurar o ambiente do agregador e executar o mesmo.
+ *
+ * @param requesterPid PID do processo requerente de execução do Agregador
+ */
 void exec_ag(pid_t requesterPid) {
 
     // Antes de executar o AG, precisamos de saber quando se deu a última agregação
@@ -245,6 +272,11 @@ void exec_ag(pid_t requesterPid) {
     }
 }
 
+/**
+ * @brief Função principal do servidor.
+ *
+ * @return 0 em caso de sucesso, !=0 em caso de erro
+ */
 int main() {
     server_startup();
 
