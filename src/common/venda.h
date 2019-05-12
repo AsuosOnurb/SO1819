@@ -17,8 +17,6 @@ extern fdb_t g_pFdbVendas;
 typedef struct venda {
     /** @brief O offset no ficheiro de VENDAS onde esta venda está guardado. -1 se esta venda ainda não está guardada ou a sua localização é desconhecida. */
     ssize_t offset;
-    /** @brief Tamanho da venda no disco. */
-    ssize_t diskSize;
     /** @brief Código do artigo. */
     long codigo;
     /** @brief Número de artigos vendidos. */
@@ -31,7 +29,7 @@ typedef struct venda {
 // #define TAMANHO_ENTRADA_VENDA (sizeof(long) + sizeof(long) + sizeof(long))
 
 /** @brief Define o offset no ficheiro STOCKS onde aparece a primeira entrada do stock de um artigo. */
-#define INICIO_ENTRADAS_VENDA 1024
+#define INICIO_ENTRADAS_VENDA (sizeof(ssize_t))
 // (sizeof(long))
 
 

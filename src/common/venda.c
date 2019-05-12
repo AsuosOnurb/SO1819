@@ -85,8 +85,6 @@ int venda_load(ssize_t offset, venda_t *vendaRef) {
         } else break;
     }
 
-    venda->diskSize = strlen(line) + 1;
-
     // Interpretar a linha
     sscanf(line, "%ld %ld %lf\n", &venda->codigo, &venda->quantidade, &venda->montante);
 
@@ -145,7 +143,7 @@ int venda_save(venda_t venda) {
         return -7; */
 
     // Escrever a venda no disco
-    if((venda->diskSize = fdb_printf(g_pFdbVendas, "%ld %ld %lf\n", venda->codigo, venda->quantidade, venda->montante)) < 0)
+    if(fdb_printf(g_pFdbVendas, "%ld %ld %lf\n", venda->codigo, venda->quantidade, venda->montante) < 0)
         return -6;
 
     // Sucesso!

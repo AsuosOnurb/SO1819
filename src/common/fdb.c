@@ -339,7 +339,7 @@ int fdb_printf(fdb_t fdbuf, const char *fmt, ...) {
     va_end(argList);
 
     // Write the output string to the buffer
-    int result = fdb_write(fdbuf, out, requiredBytes + 1);
+    int result = fdb_write(fdbuf, out, requiredBytes);
 
     // Free the memory used by the properly formatted string
     free(out);

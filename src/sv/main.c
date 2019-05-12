@@ -141,6 +141,8 @@ void exec_ag(pid_t requesterPid) {
     if(fdb_lseek(g_pFdbVendas, offsetUltimaAgregacao, SEEK_SET) != offsetUltimaAgregacao) {
         fdb_printf(fdbStderr, "[AG] [LOG] Não foi possível fazer lseek para o offset da última agregação! (Será que já foram feitas vendas?)\n");
         return;
+    } else {
+        // fdb_printf(fdbStderr, "[AG] [LOG] Feito lseek para a última posição de agregação: %ld\n", offsetUltimaAgregacao);
     }
 
     // Executar o AG num processo separado
@@ -198,10 +200,12 @@ void exec_ag(pid_t requesterPid) {
         ssize_t bytesRead;
         char buf[4096];
         while((bytesRead = fdb_read(g_pFdbVendas, buf, sizeof(buf))) > 0) {
+            // static const char newline = '\n';
             fdb_write(fdbInputPipe, buf, bytesRead);
-            fdb_write(fdbStdout, buf, bytesRead);
+            // fdb_write(fdbInputPipe, &newline, 1);
+            // fprintf(stderr, buf, bytesRead);
+            // fprintf(stderr, "bytesRead=%ld\n", bytesRead);
         }
-        fprintf(stderr, "Last bytesRead=%ld\n", bytesRead);
 
         // Fechar o lado de escrita
         fdb_fclose(fdbInputPipe);
@@ -216,7 +220,22 @@ void exec_ag(pid_t requesterPid) {
             return;
         }
 
-        // TODO: Modificar a posição da última agregação
+        // Modificar o offset da última agregação
+        ssize_t offsetUltimaAgregacao;
+        if((offsetUltimaAgregacao = fdb_lseek(g_pFdbVendas, 0, SEEK_END)) < 0) {
+            fdb_printf(fdbStderr, "[EXECUTAR_AG] [LOG] [%d] Erro ao modificar o offset da agregação!\n", requesterPid);
+            return;
+        }
+
+        if(fdb_lseek(g_pFdbVendas, 0, SEEK_SET) != 0) {
+            fdb_printf(fdbStderr, "[EXECUTAR_AG] [LOG] [%d] Erro ao fazer lseek para modificar o offset da última agregação!\n", requesterPid);
+            return;
+        }
+
+        if(fdb_write(g_pFdbVendas, &offsetUltimaAgregacao, sizeof(offsetUltimaAgregacao)) != 0) {
+            fdb_printf(fdbStderr, "[EXECUTAR_AG] [LOG] [%d] Erro ao modificar o offset da última agregação!\n", requesterPid);
+            return;
+        }
     }
 }
 
