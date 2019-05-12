@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Permite o teste de vários clientes de vendas simultâneos, com vários artigos simultaneamente e aleatóriamente.
+# O ficheiro cv_in_neg_neg_rnd_10ki.txt contém 10,000 linhas de ordens de venda de um item de um artigo aleatório, com o código entre 0 e 9999 (inclusivé).
+# Ou seja, tem 10,000 linhas "<0/1/2/3/4/.../9999> -1".
+
+# Assim, para usar este teste, é preciso ir ao MA e criar os artigos 0, 1, 2, 3, ..., 9999, previamente, e abrir um CV e acrescentar aos artigos referidos stock suficiente.
+# IMPORTANTE: Para concluir estas duas etapas, basta executar:
+## ./bin/production/ma < ma_in.txt
+## ./bin/production/cv < cv_ma_in.txt
+## Estes ficheiros contém artigos aleatóriamente gerados e automatiamente colocam o stock desses artigos a 1000000.
+
+# Sintaxe: ./testar_varios_cvs_neg_rnd_10ki <numero de clientes paralelos que devem ser executados> <production/debug, dependendo de quais dos binários queremos testar>
+
 for i in $(seq 1 $1)
 do
     cd ./bin/$2/ && ./cv < ../../cv_in_neg_rnd_10ki.txt > /dev/null &

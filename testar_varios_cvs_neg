@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Permite o teste de vários clientes de vendas simultâneos.
+# O ficheiro cv_in_neg.txt contém 10,000 linhas de ordens de venda de um item do artigo com código 0.
+# Ou seja, tem 10,000 linhas "0 -1".
+# Assim, para usar este teste, é preciso ir ao MA e criar o artigo 0 previamente, e abrir um CV e acrescentar ao artigo 0 stock suficiente.
+
+# Sintaxe: ./testar_varios_cvs_neg <numero de clientes paralelos que devem ser executados> <production/debug, dependendo de quais dos binários queremos testar>
+
 for i in $(seq 1 $1)
 do
     cd ./bin/$2/ && ./cv < ../../cv_in_neg.txt > /dev/null &

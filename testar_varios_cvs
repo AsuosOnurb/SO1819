@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Permite o teste de vários clientes de vendas simultâneos.
+# O ficheiro cv_in.txt contém 10,000 linhas de ordens de acrescentar ao stock disponível do artigo com código 0 um item.
+# Ou seja, tem 10,000 linhas "0 1".
+# Assim, para usar este teste, é preciso ir ao MA e criar o artigo 0 previamente.
+
+# Sintaxe: ./testar_varios_cvs <numero de clientes paralelos que devem ser executados> <production/debug, dependendo de quais dos binários queremos testar>
+
 for i in $(seq 1 $1)
 do
     cd ./bin/$2/ && ./cv < ../../cv_in.txt > /dev/null &
