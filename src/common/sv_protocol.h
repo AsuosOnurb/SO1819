@@ -55,7 +55,7 @@ int sv_get_info_artigo(long codigoArtigo, long *quantidade, double *preco);
  * @brief Pede ao servidor para atualizar o stock de um artigo, retornando o novo stock.
  *
  * @param codigoArtigo O código do artigo cujo stock é para ser atualizado
- * @param acrescento A quantidade a acrescentar ao stock. (Pode ser negativa positiva)
+ * @param acrescento A quantidade a acrescentar ao stock. (Pode ser negativa ou positiva)
  * @param novoStock Onde guardar o novo stock que o servidor retornou
  *
  * @return 0 se tudo correr bem; <0 em caso de erro

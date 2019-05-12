@@ -37,7 +37,7 @@ int main() {
             argvMA[i] = strtok(argvMA[i], "\n");
         }
 
-        while (argvMA[i] != NULL){
+        while (argvMA[i] != NULL) {
             argvMA[++i] = strtok(NULL," ");
         }
 

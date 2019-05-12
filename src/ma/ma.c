@@ -63,6 +63,8 @@ int alteraNome(char** argvMA){
 
     long codigo = strtol(argvMA[1], NULL, 10);
     artigo_t artigo;
+
+
     int offset = artigo_load(codigo, &artigo);
 
     if (offset < 0){
@@ -70,6 +72,8 @@ int alteraNome(char** argvMA){
         return 2;
     }
 
+    string_mark(artigo->offsetNome);
+    
     artigo->offsetNome = offsetName;
 
     int erroVal = artigo_save(artigo);

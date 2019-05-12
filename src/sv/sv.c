@@ -3,6 +3,7 @@
 #include "../common/stock.h"
 
 #include "sv.h"
+#include "../common/venda.h"
 
 int mostra_info_artigo(long codigoArtigo, long *quantidade, double *preco) {
     // Carregar o artigo parar consultar o seu preço
@@ -54,6 +55,33 @@ int atualiza_mostra_stock(long codigoArtigo, long acrescento, long *novoStock) {
 
     // Libertar a memória
     stock_free(stock);
+
+
+    // Escrever a venda em VENDAS se delta < 0
+    if (acrescento < 0) {
+        // Carregar o artigo parar consultar o seu preço
+        artigo_t artigo;
+        if (artigo_load(codigoArtigo, &artigo) != 0)
+            return -3;
+
+        double montanteVenda = artigo->preco * (-1) * acrescento; // acrescento < 0 <=> -acrescento > 0
+        long quantidadeVendidos = (-1) * acrescento;
+
+        // Criar nova venda
+        venda_t novaVenda = venda_new(codigoArtigo, quantidadeVendidos, montanteVenda);
+        // Guardar venda no ficheiro VENDAS
+        int errorVal = venda_save(novaVenda);
+        if (errorVal < 0) { // Verificar se houve erro
+            printf("Algo correu mal: sv.c:75 = %d\n", errorVal);
+            return -4;
+        }
+
+        // Libertar a memória do artigo e da venda
+        artigo_free(artigo);
+        venda_free(novaVenda);
+
+    }
+
 
     // Sucesso
     return 0;
